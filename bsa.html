@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Body Surface Area Calculator — BSA by Mosteller & Du Bois</title>
+<meta name="description" content="Calculate your body surface area (BSA) in square meters from height and weight, with both the Mosteller and Du Bois formulas.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#0e7490; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:25px;font-weight:900;text-align:center;margin:6px 0 0}
+  .sub2{text-align:center;color:var(--sub);font-size:14.5px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Body Surface Area Calculator</h1>
+    <p>Body surface area (BSA) is used in medicine to scale things like drug doses and metabolic rates to body size.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Height (cm)</label><input id="height" type="number" min="50" max="260" step="0.5" value="170"></div>
+      <div class="f"><label>Weight (kg)</label><input id="weight" type="number" min="2" max="500" step="0.5" value="70"></div>
+    </div>
+    <div class="big" id="big">-</div>
+    <div class="sub2" id="verdict">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>BSA — Mosteller formula</td><td class="v" id="mostRow">-</td></tr>
+      <tr><td>BSA — Du Bois formula</td><td class="v" id="duboisRow">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Mosteller (1987): BSA = √(height × weight ÷ 3600) — simple, and the formula most commonly used in clinical practice today, including chemotherapy dosing. Du Bois (1916): BSA = 0.007184 × height<sup>0.725</sup> × weight<sup>0.425</sup> — the classic formula, still widely cited. The two usually agree within a few percent. For reference, an average adult BSA is around 1.7–1.9 m². Never use this calculator to set a medication dose yourself — dosing is a clinician's job, and many drugs adjust further for organ function and other factors.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+function bsaMosteller(heightCm, weightKg){
+  if(!(heightCm > 0) || !(weightKg > 0)) return 0;
+  return Math.sqrt(heightCm * weightKg / 3600);
+}
+function bsaDuBois(heightCm, weightKg){
+  if(!(heightCm > 0) || !(weightKg > 0)) return 0;
+  return 0.007184 * Math.pow(heightCm, 0.725) * Math.pow(weightKg, 0.425);
+}
+function fmtBsa(x){
+  return (Math.round(x * 100) / 100).toFixed(2) + " m²";
+}
+function calc(){
+  const h = parseFloat(heightEl.value) || 0;
+  const w = parseFloat(weightEl.value) || 0;
+  const m = bsaMosteller(h, w), d = bsaDuBois(h, w);
+  bigEl.textContent = fmtBsa(m);
+  verdictEl.textContent = "body surface area (Mosteller)";
+  mostRowEl.textContent = fmtBsa(m);
+  duboisRowEl.textContent = fmtBsa(d);
+}
+const heightEl = document.getElementById("height"), weightEl = document.getElementById("weight");
+const bigEl = document.getElementById("big"), verdictEl = document.getElementById("verdict"),
+      mostRowEl = document.getElementById("mostRow"), duboisRowEl = document.getElementById("duboisRow");
+[heightEl, weightEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

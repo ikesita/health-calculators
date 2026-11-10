@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caffeine Half-Life Calculator — How Much Caffeine Is Still in Your System</title>
+<meta name="description" content="Estimate how much caffeine remains in your body after a coffee or energy drink, using caffeine's half-life of about 5 hours.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#92400e; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:17px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:25px;font-weight:900;text-align:center;margin:6px 0 0}
+  .sub2{text-align:center;color:var(--sub);font-size:14.5px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Caffeine Half-Life Calculator</h1>
+    <p>Caffeine leaves your body exponentially: about half of it is gone every 5 hours or so. See what's still on board.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Caffeine intake (mg)</label><input id="mg" type="number" min="0" max="2000" step="1" value="200"></div>
+      <div class="f"><label>Hours since you had it</label><input id="hours" type="number" min="0" max="72" step="0.5" value="5"></div>
+      <div class="f"><label>Half-life (hours)</label><select id="hl">
+        <option value="3">3 hours (fast)</option>
+        <option value="4">4 hours</option>
+        <option value="5" selected>5 hours (typical adult)</option>
+        <option value="6">6 hours</option>
+        <option value="7">7 hours</option>
+        <option value="8">8 hours (slow)</option>
+      </select></div>
+    </div>
+    <div class="big" id="big">-</div>
+    <div class="sub2" id="verdict">-</div>
+    <p class="note" style="margin-top:10px">For scale: a mug of brewed coffee has roughly 95–150 mg of caffeine, a shot of espresso about 63 mg, a can of cola about 35 mg, and energy drinks typically 80–160 mg per can.</p>
+  </div>
+
+  <div class="card">
+    <h2>How it fades</h2>
+    <table id="decayTable">
+      <tr><td>Right after (0 h)</td><td class="v" id="d0">-</td></tr>
+      <tr><td>After 2 hours</td><td class="v" id="d2">-</td></tr>
+      <tr><td>After 4 hours</td><td class="v" id="d4">-</td></tr>
+      <tr><td>After 6 hours</td><td class="v" id="d6">-</td></tr>
+      <tr><td>After 8 hours</td><td class="v" id="d8">-</td></tr>
+      <tr><td>After 12 hours</td><td class="v" id="d12">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">A rough estimate only. Sensitivity varies widely: genetics, pregnancy, some medications and liver health can stretch the half-life well beyond 8 hours, while smokers clear caffeine faster. Even 25–50 mg remaining can affect sleep in sensitive people, so a morning coffee can still matter at bedtime.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+function caffeineRemaining(mg, hours, halfLife){
+  if(!(mg > 0) || !(halfLife > 0) || hours < 0) return 0;
+  return mg * Math.pow(0.5, hours / halfLife);
+}
+function fmtMg(x){
+  return (Math.round(x * 10) / 10).toLocaleString() + " mg";
+}
+function calc(){
+  const mg = parseFloat(mgEl.value) || 0;
+  const hours = parseFloat(hoursEl.value) || 0;
+  const hl = parseFloat(hlEl.value) || 5;
+  const rem = caffeineRemaining(mg, hours, hl);
+  bigEl.textContent = fmtMg(rem);
+  verdictEl.textContent = "still in your system after " + hours + (hours === 1 ? " hour" : " hours") +
+    " (half-life " + hl + " h)";
+  [0, 2, 4, 6, 8, 12].forEach(h => {
+    document.getElementById("d" + h).textContent = fmtMg(caffeineRemaining(mg, h, hl));
+  });
+}
+const mgEl = document.getElementById("mg"), hoursEl = document.getElementById("hours"), hlEl = document.getElementById("hl");
+const bigEl = document.getElementById("big"), verdictEl = document.getElementById("verdict");
+[mgEl, hoursEl, hlEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

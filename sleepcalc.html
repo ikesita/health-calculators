@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sleep Cycle Calculator — Wake Up at the End of a Sleep Cycle</title>
+<meta name="description" content="Find wake-up times from your bedtime, or bedtimes from your alarm, using 90-minute sleep cycles plus about 15 minutes to fall asleep.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#4338ca; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:17px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Sleep Cycle Calculator</h1>
+    <p>Sleep moves in cycles of about 90 minutes. Waking at the end of a cycle — rather than mid-cycle — often feels easier. Times include about 15 minutes to fall asleep.</p>
+  </header>
+
+  <div class="card">
+    <h2>If you go to bed at…</h2>
+    <div class="grid">
+      <div class="f"><label>Bedtime (when you get into bed)</label><input id="bedTime" type="time" value="23:00"></div>
+    </div>
+    <table style="margin-top:12px">
+      <tr><td>Wake after 4 cycles (6 hours of sleep)</td><td class="v" id="w4">-</td></tr>
+      <tr><td>Wake after 5 cycles (7 hours 30 minutes)</td><td class="v" id="w5">-</td></tr>
+      <tr><td>Wake after 6 cycles (9 hours of sleep)</td><td class="v" id="w6">-</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>If you need to wake up at…</h2>
+    <div class="grid">
+      <div class="f"><label>Wake-up time</label><input id="wakeTime" type="time" value="06:45"></div>
+    </div>
+    <table style="margin-top:12px">
+      <tr><td>Go to bed for 6 cycles (9 hours of sleep)</td><td class="v" id="b6">-</td></tr>
+      <tr><td>Go to bed for 5 cycles (7 hours 30 minutes)</td><td class="v" id="b5">-</td></tr>
+      <tr><td>Go to bed for 4 cycles (6 hours of sleep)</td><td class="v" id="b4">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Cycle length varies from person to person (roughly 80–120 minutes), and so does the time you take to fall asleep. Treat these times as a starting point to experiment with, not a rule — and if you regularly feel unrefreshed, total sleep time matters more than fine-tuning the alarm by a few minutes. Most adults need 7–9 hours of sleep.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const FALL_ASLEEP = 15, CYCLE = 90;
+function parseTime(v){
+  const p = (v || "0:0").split(":");
+  return (parseInt(p[0], 10) || 0) * 60 + (parseInt(p[1], 10) || 0);
+}
+function fmtTime(totalMin){
+  let day = "";
+  let m = totalMin;
+  if(m >= 1440){ day = " (next day)"; m -= 1440; }
+  if(m < 0){ day = " (previous day)"; m += 1440; }
+  const h24 = Math.floor(m / 60), mm = m % 60;
+  const suffix = h24 < 12 ? "AM" : "PM";
+  let h12 = h24 % 12; if(h12 === 0) h12 = 12;
+  return h12 + ":" + String(mm).padStart(2, "0") + " " + suffix + day;
+}
+function wakeTimes(bedMin){
+  return { w4: fmtTime(bedMin + FALL_ASLEEP + CYCLE * 4),
+           w5: fmtTime(bedMin + FALL_ASLEEP + CYCLE * 5),
+           w6: fmtTime(bedMin + FALL_ASLEEP + CYCLE * 6) };
+}
+function bedTimes(wakeMin){
+  return { b6: fmtTime(wakeMin - FALL_ASLEEP - CYCLE * 6),
+           b5: fmtTime(wakeMin - FALL_ASLEEP - CYCLE * 5),
+           b4: fmtTime(wakeMin - FALL_ASLEEP - CYCLE * 4) };
+}
+function calc(){
+  const w = wakeTimes(parseTime(bedTimeEl.value));
+  w4El.textContent = w.w4; w5El.textContent = w.w5; w6El.textContent = w.w6;
+  const b = bedTimes(parseTime(wakeTimeEl.value));
+  b6El.textContent = b.b6; b5El.textContent = b.b5; b4El.textContent = b.b4;
+}
+const bedTimeEl = document.getElementById("bedTime"), wakeTimeEl = document.getElementById("wakeTime");
+const w4El = document.getElementById("w4"), w5El = document.getElementById("w5"), w6El = document.getElementById("w6"),
+      b6El = document.getElementById("b6"), b5El = document.getElementById("b5"), b4El = document.getElementById("b4");
+[bedTimeEl, wakeTimeEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

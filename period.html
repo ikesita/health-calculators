@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Period Calculator — Predict Your Next 3 Periods</title>
+<meta name="description" content="Predict the start dates of your next three periods from the first day of your last period and your average cycle length. Free and private.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#db2777; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:25px;font-weight:900;text-align:center;margin:6px 0 0}
+  .sub2{text-align:center;color:var(--sub);font-size:14.5px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .warn{background:#fdf2f8;border:1px solid #f9a8d4;border-radius:10px;padding:12px 14px;font-size:13.5px;color:#831843}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Period Calculator</h1>
+    <p>Predict when your next three periods are likely to start, from your last period and cycle length.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>First day of your last period</label><input id="lmp" type="date"></div>
+      <div class="f"><label>Average cycle length (days)</label><input id="cycle" type="number" min="20" max="45" step="1" value="28"></div>
+    </div>
+    <div class="big" id="big">-</div>
+    <div class="sub2" id="verdict">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Next period (1st)</td><td class="v" id="p1">-</td></tr>
+      <tr><td>Following period (2nd)</td><td class="v" id="p2">-</td></tr>
+      <tr><td>Following period (3rd)</td><td class="v" id="p3">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">How it works: each predicted period simply adds your average cycle length to the previous start date. If your cycles vary by a few days, treat each date as the middle of a likely window of a few days either side.</p>
+  </div>
+
+  <div class="warn"><b>Prediction only — please read:</b> real cycles vary from month to month, and stress, travel, illness, medication and many other factors can move a period earlier or later. These dates are a planning estimate, <b>not medical advice</b>. If your period is much later than expected, is frequently irregular, or you have pain or other symptoms that worry you, talk to a healthcare professional.</div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+function parseDateStr(s){
+  const p = (s || "").split("-").map(Number);
+  if(p.length !== 3 || p.some(isNaN)) return null;
+  return new Date(p[0], p[1] - 1, p[2]);
+}
+function addDays(d, n){ const t = new Date(d); t.setDate(t.getDate() + n); return t; }
+function nextPeriods(lmpStr, cycle){
+  const lmp = parseDateStr(lmpStr);
+  if(!lmp || !(cycle >= 15 && cycle <= 60)) return null;
+  return [addDays(lmp, cycle), addDays(lmp, cycle * 2), addDays(lmp, cycle * 3)];
+}
+const fmtDate = d => d.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+const fmtShort = d => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+function calc(){
+  const dates = nextPeriods(lmpEl.value, parseInt(cycleEl.value, 10));
+  if(!dates){
+    bigEl.textContent = "-";
+    verdictEl.textContent = "Pick the first day of your last period";
+    p1El.textContent = p2El.textContent = p3El.textContent = "-";
+    return;
+  }
+  bigEl.textContent = fmtShort(dates[0]);
+  verdictEl.textContent = "predicted start of your next period";
+  p1El.textContent = fmtDate(dates[0]);
+  p2El.textContent = fmtDate(dates[1]);
+  p3El.textContent = fmtDate(dates[2]);
+}
+const lmpEl = document.getElementById("lmp"), cycleEl = document.getElementById("cycle");
+const bigEl = document.getElementById("big"), verdictEl = document.getElementById("verdict"),
+      p1El = document.getElementById("p1"), p2El = document.getElementById("p2"), p3El = document.getElementById("p3");
+(function(){ const t = new Date(); t.setDate(t.getDate() - 28); lmpEl.valueAsDate = t; })();
+[lmpEl, cycleEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>
