@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waist-to-Hip Ratio Calculator — WHR & Health Risk Category</title>
+<meta name="description" content="Calculate your waist-to-hip ratio (WHR) from waist and hip measurements and see the WHO health risk category for women and men. Free and private.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#be185d; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:17px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Waist-to-Hip Ratio Calculator</h1>
+    <p>Your waist-to-hip ratio (WHR) and the WHO health risk category for your sex.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Sex</label><select id="sex"><option value="f" selected>Female</option><option value="m">Male</option></select></div>
+      <div class="f"><label>Units</label><select id="unit"><option value="cm" selected>Centimeters (cm)</option><option value="in">Inches (in)</option></select></div>
+      <div class="f"><label id="waistLabel">Waist (cm)</label><input id="waist" type="number" min="1" step="0.1" value="70"></div>
+      <div class="f"><label id="hipLabel">Hip (cm)</label><input id="hip" type="number" min="1" step="0.1" value="95"></div>
+    </div>
+    <div class="big" id="ratio">-</div>
+    <div class="cat" id="cat">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Women — 0.80 or below</td><td class="v">Low risk</td></tr>
+      <tr><td>Women — 0.81 to 0.85</td><td class="v">Moderate risk</td></tr>
+      <tr><td>Women — above 0.85</td><td class="v">High risk</td></tr>
+      <tr><td>Men — 0.95 or below</td><td class="v">Low risk</td></tr>
+      <tr><td>Men — 0.96 to 1.00</td><td class="v">Moderate risk</td></tr>
+      <tr><td>Men — above 1.00</td><td class="v">High risk</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Risk categories follow the WHO waist-to-hip ratio cut-offs for increased metabolic risk. Measure the waist at its narrowest point (or at the navel) and the hips at their widest, standing relaxed, without pulling the tape tight. WHR is one indicator among many — it does not diagnose any condition.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const round1 = n => Math.round(n * 10) / 10;
+function calc(){
+  const w = num(waistEl.value), h = num(hipEl.value);
+  if(w <= 0 || h <= 0){ ratioEl.textContent = "-"; catEl.textContent = ""; return; }
+  const r = w / h;
+  ratioEl.textContent = "WHR " + r.toFixed(2);
+  let c;
+  if(sexEl.value === "f") c = r <= 0.80 ? "Low risk" : r <= 0.85 ? "Moderate risk" : "High risk";
+  else c = r <= 0.95 ? "Low risk" : r <= 1.00 ? "Moderate risk" : "High risk";
+  catEl.textContent = c;
+}
+const sexEl = document.getElementById("sex"), unitEl = document.getElementById("unit"),
+      waistEl = document.getElementById("waist"), hipEl = document.getElementById("hip");
+const ratioEl = document.getElementById("ratio"), catEl = document.getElementById("cat");
+unitEl.addEventListener("input", () => {
+  const toIn = unitEl.value === "in";
+  document.getElementById("waistLabel").textContent = toIn ? "Waist (inches)" : "Waist (cm)";
+  document.getElementById("hipLabel").textContent = toIn ? "Hip (inches)" : "Hip (cm)";
+  if(num(waistEl.value) > 0) waistEl.value = round1(toIn ? num(waistEl.value) / 2.54 : num(waistEl.value) * 2.54);
+  if(num(hipEl.value) > 0) hipEl.value = round1(toIn ? num(hipEl.value) / 2.54 : num(hipEl.value) * 2.54);
+  calc();
+});
+[sexEl, waistEl, hipEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>
