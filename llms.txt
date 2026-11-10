@@ -1,0 +1,27 @@
+# Health Calculators
+
+> Free health calculators: BMI, body fat percentage, TDEE & calories, running pace, age and pregnancy due date. Everything runs in your browser — nothing is uploaded.
+
+## Pages
+
+- [Health Calculators (top page)](https://ikesita.github.io/health-calculators/)
+- [BMI Calculator — Body Mass Index & Healthy Weight Range](https://ikesita.github.io/health-calculators/bmi.html)
+- [Body Fat Calculator — US Navy Tape-Measure Method](https://ikesita.github.io/health-calculators/bodyfat.html)
+- [TDEE & Calorie Calculator — BMR, Maintenance, Cut & Bulk Calories](https://ikesita.github.io/health-calculators/tdee.html)
+- [Running Pace Calculator — Pace per km/mile & Race Time Predictions](https://ikesita.github.io/health-calculators/pace.html)
+- [Age Calculator — Exact Age in Years, Months, Days & Total Days](https://ikesita.github.io/health-calculators/age.html)
+- [Pregnancy Due Date Calculator — From Last Period (LMP)](https://ikesita.github.io/health-calculators/pregnancy.html)
+- [Waist-to-Hip Ratio Calculator — WHR & Health Risk Category](https://ikesita.github.io/health-calculators/whr.html)
+- [Daily Water Intake Calculator — How Much Water Should You Drink?](https://ikesita.github.io/health-calculators/water.html)
+- [One-Rep Max Calculator — Estimate Your 1RM (Epley Formula)](https://ikesita.github.io/health-calculators/onerm.html)
+- [Macro Calculator — Protein, Fat & Carbs in Grams per Day](https://ikesita.github.io/health-calculators/macros.html)
+- [Blood Alcohol Calculator (BAC) — Widmark Estimate](https://ikesita.github.io/health-calculators/bac.html)
+- [Heart Rate Zone Calculator — Karvonen Training Zones](https://ikesita.github.io/health-calculators/hrzones.html)
+- [VO2 Max Calculator — Rockport One-Mile Walk Test](https://ikesita.github.io/health-calculators/vo2max.html)
+- [Ovulation Calculator — Fertile Window & Ovulation Day Estimate](https://ikesita.github.io/health-calculators/ovulation.html)
+- [Calorie Deficit Calculator — Daily Intake Target for Weight Loss](https://ikesita.github.io/health-calculators/caloriedeficit.html)
+- [Ideal Weight Calculator — Healthy BMI Range & Devine Formula](https://ikesita.github.io/health-calculators/idealweight.html)
+- [Period Calculator — Predict Your Next 3 Periods](https://ikesita.github.io/health-calculators/period.html)
+- [Sleep Cycle Calculator — Wake Up at the End of a Sleep Cycle](https://ikesita.github.io/health-calculators/sleepcalc.html)
+- [Caffeine Half-Life Calculator — How Much Caffeine Is Still in Your System](https://ikesita.github.io/health-calculators/caffeine.html)
+- [Body Surface Area Calculator — BSA by Mosteller & Du Bois](https://ikesita.github.io/health-calculators/bsa.html)
