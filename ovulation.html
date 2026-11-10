@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ovulation Calculator — Fertile Window & Ovulation Day Estimate</title>
+<meta name="description" content="Estimate your ovulation day and fertile window from the first day of your last period and your cycle length. Free, private, and clearly an estimate only.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#c026d3; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:25px;font-weight:900;text-align:center;margin:6px 0 0}
+  .sub2{text-align:center;color:var(--sub);font-size:14.5px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .warn{background:#fdf4ff;border:1px solid #f0abfc;border-radius:10px;padding:12px 14px;font-size:13.5px;color:#701a75}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Ovulation Calculator</h1>
+    <p>Estimate your ovulation day and fertile window from your last period and cycle length.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>First day of your last period</label><input id="lmp" type="date"></div>
+      <div class="f"><label>Cycle length (days)</label><input id="cycle" type="number" min="20" max="45" step="1" value="28"></div>
+    </div>
+    <div class="big" id="big">-</div>
+    <div class="sub2" id="verdict">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Estimated ovulation day</td><td class="v" id="ovuRow">-</td></tr>
+      <tr><td>Fertile window starts</td><td class="v" id="fertStartRow">-</td></tr>
+      <tr><td>Fertile window ends</td><td class="v" id="fertEndRow">-</td></tr>
+      <tr><td>Next period expected</td><td class="v" id="nextRow">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">How it works: ovulation is estimated at 14 days before the next period, so the ovulation day is your last period's first day plus (cycle length − 14). The fertile window covers the 5 days before ovulation (sperm can survive up to about 5 days) through the day after (the egg lives about a day).</p>
+  </div>
+
+  <div class="warn"><b>Estimate only — please read:</b> this calculator assumes a regular cycle and the textbook 14-day luteal phase. Real ovulation varies from cycle to cycle and person to person, and stress, illness and many other factors can shift it. <b>Do not rely on this tool for contraception</b> or for medical decisions. If you are trying to conceive, have irregular cycles, or have health concerns, talk to a healthcare professional; ovulation test kits and basal body temperature tracking give direct evidence that a calendar cannot.</div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+function parseDateStr(s){
+  const p = (s || "").split("-").map(Number);
+  if(p.length !== 3 || p.some(isNaN)) return null;
+  return new Date(p[0], p[1] - 1, p[2]);
+}
+function addDays(d, n){ const t = new Date(d); t.setDate(t.getDate() + n); return t; }
+function ovulationInfo(lmpStr, cycle){
+  const lmp = parseDateStr(lmpStr);
+  if(!lmp || !(cycle >= 15 && cycle <= 60)) return null;
+  const ovulation = addDays(lmp, cycle - 14);
+  return { lmp: lmp, ovulation: ovulation,
+           fertileStart: addDays(ovulation, -5), fertileEnd: addDays(ovulation, 1),
+           nextPeriod: addDays(lmp, cycle) };
+}
+const fmtDate = d => d.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+const fmtShort = d => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+function calc(){
+  const info = ovulationInfo(lmpEl.value, parseInt(cycleEl.value, 10));
+  if(!info){
+    bigEl.textContent = "-";
+    verdictEl.textContent = "Pick the first day of your last period";
+    ovuRowEl.textContent = fertStartRowEl.textContent = fertEndRowEl.textContent = nextRowEl.textContent = "-";
+    return;
+  }
+  bigEl.textContent = fmtShort(info.ovulation);
+  verdictEl.textContent = "estimated ovulation day";
+  ovuRowEl.textContent = fmtDate(info.ovulation);
+  fertStartRowEl.textContent = fmtDate(info.fertileStart);
+  fertEndRowEl.textContent = fmtDate(info.fertileEnd);
+  nextRowEl.textContent = fmtDate(info.nextPeriod);
+}
+const lmpEl = document.getElementById("lmp"), cycleEl = document.getElementById("cycle");
+const bigEl = document.getElementById("big"), verdictEl = document.getElementById("verdict"),
+      ovuRowEl = document.getElementById("ovuRow"), fertStartRowEl = document.getElementById("fertStartRow"),
+      fertEndRowEl = document.getElementById("fertEndRow"), nextRowEl = document.getElementById("nextRow");
+(function(){ const t = new Date(); t.setDate(t.getDate() - 14); lmpEl.valueAsDate = t; })();
+[lmpEl, cycleEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

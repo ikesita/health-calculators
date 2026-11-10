@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ideal Weight Calculator — Healthy BMI Range & Devine Formula</title>
+<meta name="description" content="Your healthy weight range from BMI (18.5–24.9) and your Devine ideal body weight, from just your height and sex. Free and private.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#0d9488; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:30px;font-weight:900;text-align:center;margin:6px 0 0}
+  .sub2{text-align:center;color:var(--sub);font-size:14.5px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Ideal Weight Calculator</h1>
+    <p>The healthy weight range for your height, plus the classic Devine formula estimate.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Height (cm)</label><input id="height" type="number" min="100" max="250" step="0.1" value="170"></div>
+      <div class="f"><label>Sex (for the Devine formula)</label><select id="sex"><option value="m">Male</option><option value="f">Female</option></select></div>
+    </div>
+    <div class="big" id="big">-</div>
+    <div class="sub2" id="verdict">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Healthy range — low end (BMI 18.5)</td><td class="v" id="lowRow">-</td></tr>
+      <tr><td>Healthy range — high end (BMI 24.9)</td><td class="v" id="highRow">-</td></tr>
+      <tr><td>Devine ideal body weight</td><td class="v" id="devineRow">-</td></tr>
+      <tr><td>Your height</td><td class="v" id="heightRow">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">The healthy range is the weight band where BMI falls between 18.5 and 24.9. The Devine formula (1974, originally for drug dosing) estimates ideal weight as 50 kg (men) or 45.5 kg (women) plus 2.3 kg for every inch over 5 feet. Both are rough population guides: they don't account for muscle mass, bone structure or body composition, so an athletic person can be healthy above the range and a person inside it can still have health risks. For personal advice, consult a healthcare professional.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+function bmiRangeKg(cm){
+  const m = cm / 100;
+  return { low: 18.5 * m * m, high: 24.9 * m * m };
+}
+function devineKg(sex, cm){
+  const inches = cm / 2.54;
+  const base = sex === "m" ? 50 : 45.5;
+  return base + 2.3 * (inches - 60);
+}
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const kg1 = n => n.toFixed(1) + " kg";
+function calc(){
+  const cm = num(hEl.value);
+  if(cm <= 0){
+    bigEl.textContent = "-";
+    verdictEl.textContent = "Enter your height";
+    lowRowEl.textContent = highRowEl.textContent = devineRowEl.textContent = heightRowEl.textContent = "-";
+    return;
+  }
+  const r = bmiRangeKg(cm);
+  const d = devineKg(sexEl.value, cm);
+  bigEl.textContent = kg1(r.low) + " – " + kg1(r.high);
+  verdictEl.textContent = "healthy weight range for " + cm + " cm";
+  lowRowEl.textContent = kg1(r.low);
+  highRowEl.textContent = kg1(r.high);
+  devineRowEl.textContent = kg1(d);
+  const totalIn = cm / 2.54;
+  heightRowEl.textContent = cm + " cm (" + Math.floor(totalIn / 12) + " ft " + (totalIn % 12).toFixed(1) + " in)";
+}
+const hEl = document.getElementById("height"), sexEl = document.getElementById("sex");
+const bigEl = document.getElementById("big"), verdictEl = document.getElementById("verdict"),
+      lowRowEl = document.getElementById("lowRow"), highRowEl = document.getElementById("highRow"),
+      devineRowEl = document.getElementById("devineRow"), heightRowEl = document.getElementById("heightRow");
+[hEl, sexEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calorie Deficit Calculator — Daily Intake Target for Weight Loss</title>
+<meta name="description" content="Find the daily calorie intake for losing 0.25, 0.5 or 1 kg per week. Computes your TDEE with Mifflin-St Jeor, or use your own TDEE. Free and private.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#65a30d; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .sub2{text-align:center;color:var(--sub);font-size:14.5px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .warn{display:none;background:#fefce8;border:1px solid #fde047;border-radius:10px;padding:12px 14px;font-size:13.5px;color:#713f12;margin-top:12px}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Calorie Deficit Calculator</h1>
+    <p>The daily calorie intake that matches your weight-loss pace, based on your TDEE.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Sex</label><select id="sex"><option value="m">Male</option><option value="f">Female</option></select></div>
+      <div class="f"><label>Age (years)</label><input id="age" type="number" min="10" max="100" step="1" value="30"></div>
+      <div class="f"><label>Height (cm)</label><input id="height" type="number" min="100" max="250" step="0.1" value="170"></div>
+      <div class="f"><label>Weight (kg)</label><input id="weight" type="number" min="25" max="300" step="0.1" value="70"></div>
+      <div class="f"><label>Activity level</label><select id="act">
+        <option value="1.2">Sedentary (desk job, little exercise)</option>
+        <option value="1.375">Light (exercise 1–3 days/week)</option>
+        <option value="1.55" selected>Moderate (exercise 3–5 days/week)</option>
+        <option value="1.725">Active (exercise 6–7 days/week)</option>
+        <option value="1.9">Athlete (physical job + training)</option>
+      </select></div>
+      <div class="f"><label>…or enter your TDEE directly (kcal/day, optional)</label><input id="tdeeDirect" type="number" min="0" step="1" placeholder="Leave blank to compute"></div>
+      <div class="f"><label>Goal — weight loss per week</label><select id="rate">
+        <option value="0.25">0.25 kg/week (gentle)</option>
+        <option value="0.5" selected>0.5 kg/week (steady)</option>
+        <option value="1">1.0 kg/week (fast)</option>
+      </select></div>
+    </div>
+    <div class="big" id="big">-</div>
+    <div class="sub2" id="verdict">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>BMR (Mifflin-St Jeor)</td><td class="v" id="bmrRow">-</td></tr>
+      <tr><td>TDEE used (maintenance)</td><td class="v" id="tdeeRow">-</td></tr>
+      <tr><td>Daily deficit</td><td class="v" id="defRow">-</td></tr>
+      <tr><td>Target daily intake</td><td class="v" id="targetRow">-</td></tr>
+    </table>
+    <div class="warn" id="floorWarn"></div>
+    <p class="note" style="margin-top:10px">The math: 1 kg of body fat stores roughly 7,700 kcal, so losing 0.25 / 0.5 / 1.0 kg per week needs an average deficit of about 275 / 550 / 1,100 kcal per day. Real results vary — metabolism adapts and not all weight lost is fat. <b>Do not go below generally recommended minimum intakes (commonly cited as about 1,200 kcal/day for women and 1,500 kcal/day for men) without medical supervision</b>, and consult a doctor or registered dietitian before starting a calorie-restricted diet, especially if you are pregnant, breastfeeding, under 18, or have any medical condition or history of eating disorders.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const KCAL_PER_KG = 7700;
+function mifflinBMR(sex, kg, cm, age){
+  return 10 * kg + 6.25 * cm - 5 * age + (sex === "m" ? 5 : -161);
+}
+function dailyDeficit(rateKgPerWeek){ return rateKgPerWeek * KCAL_PER_KG / 7; }
+function targetIntake(tdee, rateKgPerWeek){ return tdee - dailyDeficit(rateKgPerWeek); }
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const kcal = n => Math.round(n).toLocaleString("en-US") + " kcal/day";
+function calc(){
+  const kg = num(wEl.value), cm = num(hEl.value), age = num(ageEl.value);
+  const bmr = (kg > 0 && cm > 0 && age > 0) ? mifflinBMR(sexEl.value, kg, cm, age) : 0;
+  const computedTdee = bmr > 0 ? bmr * num(actEl.value) : 0;
+  const direct = num(directEl.value);
+  const tdee = direct > 0 ? direct : computedTdee;
+  const rate = num(rateEl.value);
+  if(tdee <= 0 || rate <= 0){
+    bigEl.textContent = "-";
+    verdictEl.textContent = "Enter your details or a TDEE";
+    bmrRowEl.textContent = tdeeRowEl.textContent = defRowEl.textContent = targetRowEl.textContent = "-";
+    floorWarnEl.style.display = "none";
+    return;
+  }
+  const target = targetIntake(tdee, rate);
+  bigEl.textContent = kcal(target);
+  verdictEl.textContent = "to lose about " + rate + " kg per week";
+  bmrRowEl.textContent = bmr > 0 ? kcal(bmr) : "—";
+  tdeeRowEl.textContent = kcal(tdee) + (direct > 0 ? " (entered directly)" : "");
+  defRowEl.textContent = Math.round(dailyDeficit(rate)).toLocaleString("en-US") + " kcal/day";
+  targetRowEl.textContent = kcal(target);
+  const floor = sexEl.value === "f" ? 1200 : 1500;
+  if(target < floor){
+    floorWarnEl.style.display = "block";
+    floorWarnEl.textContent = "Caution: this target (" + kcal(target) + ") falls below the commonly cited minimum of about " + floor.toLocaleString("en-US") + " kcal/day. A slower pace — or professional guidance — is strongly recommended instead.";
+  } else {
+    floorWarnEl.style.display = "none";
+  }
+}
+const sexEl = document.getElementById("sex"), ageEl = document.getElementById("age"),
+      hEl = document.getElementById("height"), wEl = document.getElementById("weight"),
+      actEl = document.getElementById("act"), directEl = document.getElementById("tdeeDirect"),
+      rateEl = document.getElementById("rate");
+const bigEl = document.getElementById("big"), verdictEl = document.getElementById("verdict"),
+      bmrRowEl = document.getElementById("bmrRow"), tdeeRowEl = document.getElementById("tdeeRow"),
+      defRowEl = document.getElementById("defRow"), targetRowEl = document.getElementById("targetRow"),
+      floorWarnEl = document.getElementById("floorWarn");
+[sexEl, ageEl, hEl, wEl, actEl, directEl, rateEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>
