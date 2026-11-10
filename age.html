@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Age Calculator — Exact Age in Years, Months, Days & Total Days</title>
+<meta name="description" content="Calculate an exact age from a birth date: years, months and days, plus total days lived and the weekday of birth. Free and private.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#059669; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:26px;font-weight:900;text-align:center;margin:10px 0 2px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Age Calculator</h1>
+    <p>Exact age from a date of birth — in years, months and days.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Date of birth</label><input id="dob" type="date" value="1990-08-07"></div>
+      <div class="f"><label>Age as of (default: today)</label><input id="asof" type="date"></div>
+    </div>
+    <div class="big" id="out">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Total days</td><td class="v" id="totalDays">-</td></tr>
+      <tr><td>Total weeks</td><td class="v" id="totalWeeks">-</td></tr>
+      <tr><td>Total months (approx.)</td><td class="v" id="totalMonths">-</td></tr>
+      <tr><td>Born on a</td><td class="v" id="weekday">-</td></tr>
+      <tr><td>Next birthday</td><td class="v" id="nextBday">-</td></tr>
+    </table>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const parse = v => { const [y,m,d] = v.split("-").map(Number); return new Date(y, m - 1, d); };
+const WD = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const fmtD = dt => dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+document.getElementById("asof").valueAsDate = new Date();
+function calc(){
+  const bv = dobEl.value, av = asofEl.value;
+  if(!bv || !av) return;
+  const b = parse(bv), a = parse(av);
+  if(a < b){ outEl.textContent = "The \"as of\" date is before the birth date."; return; }
+  let y = a.getFullYear() - b.getFullYear();
+  let m = a.getMonth() - b.getMonth();
+  let d = a.getDate() - b.getDate();
+  if(d < 0){ m -= 1; const prev = new Date(a.getFullYear(), a.getMonth(), 0); d += prev.getDate(); }
+  if(m < 0){ y -= 1; m += 12; }
+  outEl.textContent = y + " years, " + m + " months, " + d + " days";
+  const days = Math.round((a - b) / 86400000);
+  totalDaysEl.textContent = days.toLocaleString("en-US") + " days";
+  totalWeeksEl.textContent = Math.floor(days / 7).toLocaleString("en-US") + " weeks and " + (days % 7) + " days";
+  totalMonthsEl.textContent = (y * 12 + m) + " months and " + d + " days";
+  weekdayEl.textContent = WD[b.getDay()];
+  let nb = new Date(a.getFullYear(), b.getMonth(), b.getDate());
+  if(nb <= a) nb = new Date(a.getFullYear() + 1, b.getMonth(), b.getDate());
+  nextBdayEl.textContent = fmtD(nb) + " (" + Math.round((nb - a) / 86400000) + " days away)";
+}
+const dobEl = document.getElementById("dob"), asofEl = document.getElementById("asof");
+const outEl = document.getElementById("out"), totalDaysEl = document.getElementById("totalDays"),
+      totalWeeksEl = document.getElementById("totalWeeks"), totalMonthsEl = document.getElementById("totalMonths"),
+      weekdayEl = document.getElementById("weekday"), nextBdayEl = document.getElementById("nextBday");
+[dobEl, asofEl].forEach(el => el.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

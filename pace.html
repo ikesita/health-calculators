@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Running Pace Calculator — Pace per km/mile & Race Time Predictions</title>
+<meta name="description" content="Enter a distance and finish time to get your pace per kilometer and per mile, plus predicted finish times for 5K, 10K, half marathon and marathon.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#2563eb; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .row input{width:78px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .row input.dist{width:120px}
+  .row select{padding:9px;border:1px solid var(--line);border-radius:8px;font-size:15px}
+  .row label{font-size:13px;color:var(--sub)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Running Pace Calculator</h1>
+    <p>Enter a distance and finish time to see your pace — and what that pace predicts for other race distances.</p>
+  </header>
+
+  <div class="card">
+    <h2>Your run</h2>
+    <div class="row" style="margin-bottom:12px">
+      <label>Distance</label><input class="dist" id="dist" type="number" min="0" step="0.001" value="42.195">
+      <select id="unit"><option value="km">kilometers</option><option value="mi">miles</option></select>
+      <label style="margin-left:8px">Quick set:</label>
+      <select id="preset">
+        <option value="">— choose a race —</option>
+        <option value="5">5K</option><option value="10">10K</option>
+        <option value="21.0975">Half marathon</option><option value="42.195" selected>Marathon</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>Finish time</label>
+      <input id="hh" type="number" min="0" value="3"><span>h</span>
+      <input id="mm" type="number" min="0" max="59" value="30"><span>m</span>
+      <input id="ss" type="number" min="0" max="59" value="0"><span>s</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Pace per kilometer</td><td class="v" id="paceKm">-</td></tr>
+      <tr><td>Pace per mile</td><td class="v" id="paceMi">-</td></tr>
+      <tr><td>Speed</td><td class="v" id="speed">-</td></tr>
+    </table>
+    <table style="margin-top:12px">
+      <tr><td>Predicted 5K</td><td class="v" id="p5">-</td></tr>
+      <tr><td>Predicted 10K</td><td class="v" id="p10">-</td></tr>
+      <tr><td>Predicted half marathon (21.0975 km)</td><td class="v" id="pHalf">-</td></tr>
+      <tr><td>Predicted marathon (42.195 km)</td><td class="v" id="pFull">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Predictions are a simple projection that holds your pace constant across distances. In reality, pace slows as distance grows, so treat longer-distance predictions as optimistic targets rather than forecasts.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const MILE_KM = 1.609344;
+function fmtPace(secPerKm, perMile){
+  const s = perMile ? secPerKm * MILE_KM : secPerKm;
+  const m = Math.floor(s / 60), ss = Math.round(s % 60);
+  return m + ":" + String(ss).padStart(2, "0") + (perMile ? " /mile" : " /km");
+}
+function fmtTime(totalSec){
+  totalSec = Math.round(totalSec);
+  const h = Math.floor(totalSec / 3600), m = Math.floor((totalSec % 3600) / 60), s = totalSec % 60;
+  return (h > 0 ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0");
+}
+function calc(){
+  let distKm = num(distEl.value);
+  if(unitEl.value === "mi") distKm = distKm * MILE_KM;
+  const total = num(hhEl.value) * 3600 + num(mmEl.value) * 60 + num(ssEl.value);
+  if(distKm <= 0 || total <= 0) return;
+  const spk = total / distKm;
+  paceKmEl.textContent = fmtPace(spk, false);
+  paceMiEl.textContent = fmtPace(spk, true);
+  speedEl.textContent = (3600 / spk).toFixed(2) + " km/h (" + (3600 / (spk * MILE_KM)).toFixed(2) + " mph)";
+  p5El.textContent = fmtTime(spk * 5);
+  p10El.textContent = fmtTime(spk * 10);
+  pHalfEl.textContent = fmtTime(spk * 21.0975);
+  pFullEl.textContent = fmtTime(spk * 42.195);
+}
+const distEl = document.getElementById("dist"), unitEl = document.getElementById("unit"), presetEl = document.getElementById("preset");
+const hhEl = document.getElementById("hh"), mmEl = document.getElementById("mm"), ssEl = document.getElementById("ss");
+const paceKmEl = document.getElementById("paceKm"), paceMiEl = document.getElementById("paceMi"), speedEl = document.getElementById("speed");
+const p5El = document.getElementById("p5"), p10El = document.getElementById("p10"), pHalfEl = document.getElementById("pHalf"), pFullEl = document.getElementById("pFull");
+presetEl.addEventListener("input", () => {
+  if(!presetEl.value) return;
+  if(unitEl.value === "km") distEl.value = presetEl.value;
+  else distEl.value = (parseFloat(presetEl.value) / MILE_KM).toFixed(3);
+  calc();
+});
+[distEl, unitEl, hhEl, mmEl, ssEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

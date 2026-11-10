@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Calculators — BMI, Body Fat, TDEE, Pace, Age & Due Date</title>
+<meta name="description" content="Free health calculators: BMI, body fat percentage, TDEE & calories, running pace, age and pregnancy due date. Everything runs in your browser — nothing is uploaded.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#059669; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:860px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:27px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 20px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .tool{display:block;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;text-decoration:none;color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .tool:hover{border-color:var(--acc)}
+  .tool .t{font-weight:800;font-size:16.5px;margin-bottom:4px}
+  .tool .d{color:var(--sub);font-size:13.5px}
+  footer{color:var(--sub);font-size:12.5px;margin-top:26px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Health Calculators</h1>
+    <p>Simple, free health and fitness calculators. Every tool runs entirely in your browser — your input is never uploaded to a server.</p>
+  </header>
+  <div class="grid">
+    <a class="tool" href="bmi.html"><div class="t">BMI Calculator</div><div class="d">Your Body Mass Index, category and healthy weight range.</div></a>
+    <a class="tool" href="bodyfat.html"><div class="t">Body Fat Calculator</div><div class="d">Estimate body fat percentage with the US Navy tape-measure method.</div></a>
+    <a class="tool" href="tdee.html"><div class="t">TDEE & Calorie Calculator</div><div class="d">Daily calories to maintain, lose or gain weight, from BMR and activity.</div></a>
+    <a class="tool" href="pace.html"><div class="t">Running Pace Calculator</div><div class="d">Pace per km and mile, plus predicted 5K to marathon finish times.</div></a>
+    <a class="tool" href="age.html"><div class="t">Age Calculator</div><div class="d">Exact age in years, months and days, and total days lived.</div></a>
+    <a class="tool" href="pregnancy.html"><div class="t">Pregnancy Due Date Calculator</div><div class="d">Estimated due date and current week from your last period date.</div></a>
+  </div>
+  <footer>These calculators provide general estimates only and are not medical advice. Please consult a healthcare professional for personal health decisions.</footer>
+</div>
+</body>
+</html>

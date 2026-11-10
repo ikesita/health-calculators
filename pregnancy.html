@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pregnancy Due Date Calculator — From Last Period (LMP)</title>
+<meta name="description" content="Estimate your pregnancy due date from the first day of your last menstrual period (Naegele's rule), see your current week, and key milestone dates.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#db2777; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:26px;font-weight:900;text-align:center;margin:12px 0 2px}
+  .sub2{text-align:center;color:var(--sub);font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .warn{border-color:#f3c2d8;background:#fff5f9}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Pregnancy Due Date Calculator</h1>
+    <p>Enter the first day of your last menstrual period (LMP). The due date is estimated as LMP + 280 days (Naegele's rule).</p>
+  </header>
+
+  <div class="card">
+    <div class="f"><label>First day of last menstrual period (LMP)</label><input id="lmp" type="date"></div>
+    <div class="big" id="dueOut">-</div>
+    <div class="sub2" id="gaOut">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Week 12 milestone (end of first trimester approach)</td><td class="v" id="w12">-</td></tr>
+      <tr><td>Week 20 milestone (mid-pregnancy)</td><td class="v" id="w20">-</td></tr>
+      <tr><td>Week 28 (third trimester begins)</td><td class="v" id="w28">-</td></tr>
+      <tr><td>Week 37 (early term)</td><td class="v" id="w37">-</td></tr>
+    </table>
+  </div>
+
+  <div class="card warn">
+    <p class="note" style="margin:0"><b>Important:</b> This calculator gives estimates only, based on a standard 28-day cycle. Real due dates vary, only a small share of babies arrive on the exact estimated date, and cycle length or conception timing can shift the estimate by days or weeks. Please confirm your due date and pregnancy progress with your doctor, midwife, or another healthcare provider, and follow their guidance over any online calculator.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const parse = v => { const [y,m,d] = v.split("-").map(Number); return new Date(y, m - 1, d); };
+const fmtD = dt => dt.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+const add = (dt, days) => { const t = new Date(dt); t.setDate(t.getDate() + days); return t; };
+(function(){ const t = new Date(); t.setDate(t.getDate() - 70); document.getElementById("lmp").valueAsDate = t; })();
+function calc(){
+  const v = lmpEl.value;
+  if(!v) return;
+  const lmp = parse(v);
+  const due = add(lmp, 280);
+  dueOutEl.textContent = "Estimated due date: " + fmtD(due);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = Math.round((today - lmp) / 86400000);
+  if(days < 0) gaOutEl.textContent = "The LMP date is in the future.";
+  else if(days > 300) gaOutEl.textContent = "That LMP is more than 300 days ago — please check the date.";
+  else gaOutEl.textContent = "Today you are approximately " + Math.floor(days / 7) + " weeks and " + (days % 7) + " days along (of about 40 weeks).";
+  w12El.textContent = fmtD(add(lmp, 84));
+  w20El.textContent = fmtD(add(lmp, 140));
+  w28El.textContent = fmtD(add(lmp, 196));
+  w37El.textContent = fmtD(add(lmp, 259));
+}
+const lmpEl = document.getElementById("lmp");
+const dueOutEl = document.getElementById("dueOut"), gaOutEl = document.getElementById("gaOut");
+const w12El = document.getElementById("w12"), w20El = document.getElementById("w20"), w28El = document.getElementById("w28"), w37El = document.getElementById("w37");
+lmpEl.addEventListener("input", calc);
+calc();
+</script>
+</body>
+</html>

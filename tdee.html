@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TDEE & Calorie Calculator — BMR, Maintenance, Cut & Bulk Calories</title>
+<meta name="description" content="Calculate your BMR and TDEE with the Mifflin-St Jeor equation, plus daily calorie targets for losing or gaining 0.5 kg per week. Free and private.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#d97706; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>TDEE & Calorie Calculator</h1>
+    <p>Your basal metabolic rate (BMR) and total daily energy expenditure (TDEE), using the Mifflin-St Jeor equation.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Sex</label><select id="sex"><option value="m">Male</option><option value="f">Female</option></select></div>
+      <div class="f"><label>Age (years)</label><input id="age" type="number" min="10" max="100" step="1" value="30"></div>
+      <div class="f"><label>Height (cm)</label><input id="height" type="number" min="100" max="250" step="0.1" value="170"></div>
+      <div class="f"><label>Weight (kg)</label><input id="weight" type="number" min="25" max="300" step="0.1" value="70"></div>
+      <div class="f"><label>Activity level</label><select id="act">
+        <option value="1.2">Sedentary (desk job, little exercise)</option>
+        <option value="1.375">Light (exercise 1–3 days/week)</option>
+        <option value="1.55" selected>Moderate (exercise 3–5 days/week)</option>
+        <option value="1.725">Active (exercise 6–7 days/week)</option>
+        <option value="1.9">Athlete (physical job + training)</option>
+      </select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>BMR (calories at complete rest)</td><td class="v" id="bmr">-</td></tr>
+      <tr><td>TDEE (maintenance calories)</td><td class="v" id="tdee">-</td></tr>
+      <tr><td>Lose ~0.5 kg/week (−550 kcal/day)</td><td class="v" id="cut">-</td></tr>
+      <tr><td>Gain ~0.5 kg/week (+550 kcal/day)</td><td class="v" id="bulk">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">These are population-formula estimates; individual metabolism varies (often ±10%). Track your weight trend for 2–3 weeks at a target and adjust by ~100–200 kcal if the trend differs. Very low calorie targets can be unsafe — consult a professional before aggressive dieting.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const kcal = n => Math.round(n).toLocaleString("en-US") + " kcal/day";
+function calc(){
+  const kg = num(wEl.value), cm = num(hEl.value), age = num(ageEl.value);
+  if(kg <= 0 || cm <= 0 || age <= 0) return;
+  let bmr = 10 * kg + 6.25 * cm - 5 * age + (sexEl.value === "m" ? 5 : -161);
+  const tdee = bmr * num(actEl.value);
+  bmrEl.textContent = kcal(bmr);
+  tdeeEl.textContent = kcal(tdee);
+  cutEl.textContent = kcal(tdee - 550);
+  bulkEl.textContent = kcal(tdee + 550);
+}
+const sexEl = document.getElementById("sex"), ageEl = document.getElementById("age"),
+      hEl = document.getElementById("height"), wEl = document.getElementById("weight"), actEl = document.getElementById("act");
+const bmrEl = document.getElementById("bmr"), tdeeEl = document.getElementById("tdee"),
+      cutEl = document.getElementById("cut"), bulkEl = document.getElementById("bulk");
+[sexEl, ageEl, hEl, wEl, actEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Body Fat Calculator — US Navy Tape-Measure Method</title>
+<meta name="description" content="Estimate your body fat percentage from neck, waist and hip measurements using the US Navy method. Free and private: runs in your browser.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#be185d; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:16px}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Body Fat Calculator (US Navy Method)</h1>
+    <p>Estimate body fat percentage from tape measurements of your neck, waist and hips.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Sex</label><select id="sex"><option value="m">Male</option><option value="f">Female</option></select></div>
+      <div class="f"><label>Height (cm)</label><input id="height" type="number" min="50" max="250" step="0.1" value="170"></div>
+      <div class="f"><label>Neck (cm)</label><input id="neck" type="number" min="10" max="100" step="0.1" value="38"></div>
+      <div class="f"><label>Waist (cm, at navel height)</label><input id="waist" type="number" min="30" max="200" step="0.1" value="85"></div>
+      <div class="f" id="hipWrap" style="display:none"><label>Hips (cm, women only)</label><input id="hip" type="number" min="30" max="200" step="0.1" value="95"></div>
+    </div>
+    <div class="big" id="bf">-</div>
+    <div class="cat" id="cat">-</div>
+  </div>
+
+  <div class="card">
+    <p class="note"><b>Reference ranges (adults):</b> Men — 6–13% athlete/fitness, 14–17% average-lean, 18–24% somewhat high, 25%+ high. Women — 14–20% athlete/fitness, 21–24% average-lean, 25–31% somewhat high, 32%+ high.<br>
+    The Navy method estimates from circumferences and typically carries an error of a few percentage points versus lab methods (DEXA, hydrostatic). Use it to track change over time rather than as an exact figure.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere. See also the <a href="bmi.html">BMI Calculator</a>.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const log10 = x => Math.log(x) / Math.log(10);
+function calc(){
+  const h = num(heightEl.value), neck = num(neckEl.value), waist = num(waistEl.value), hip = num(hipEl.value);
+  let bf = NaN;
+  if(sexEl.value === "m"){
+    const d = waist - neck;
+    if(d > 0) bf = 495 / (1.0324 - 0.19077 * log10(d) + 0.15456 * log10(h)) - 450;
+  } else {
+    const d = waist + hip - neck;
+    if(d > 0) bf = 495 / (1.29579 - 0.35004 * log10(d) + 0.22100 * log10(h)) - 450;
+  }
+  if(isNaN(bf) || bf <= 0 || bf > 80){ bfEl.textContent = "Check your inputs"; catEl.textContent = ""; return; }
+  bfEl.textContent = "Body fat ≈ " + bf.toFixed(1) + " %";
+  if(sexEl.value === "m") catEl.textContent = bf < 14 ? "Athlete / fitness range" : bf < 18 ? "Average-lean" : bf < 25 ? "Somewhat high" : "High";
+  else catEl.textContent = bf < 21 ? "Athlete / fitness range" : bf < 25 ? "Average-lean" : bf < 32 ? "Somewhat high" : "High";
+}
+const sexEl = document.getElementById("sex"), heightEl = document.getElementById("height"), neckEl = document.getElementById("neck"),
+      waistEl = document.getElementById("waist"), hipEl = document.getElementById("hip");
+const bfEl = document.getElementById("bf"), catEl = document.getElementById("cat");
+sexEl.addEventListener("input", () => { document.getElementById("hipWrap").style.display = sexEl.value === "f" ? "block" : "none"; calc(); });
+[heightEl, neckEl, waistEl, hipEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>
