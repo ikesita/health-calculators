@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heart Rate Zone Calculator — Karvonen Training Zones</title>
+<meta name="description" content="Find your five heart rate training zones with the Karvonen formula, using your age and resting heart rate. Zone 1 recovery to Zone 5 peak, in beats per minute.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#e11d48; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .sub2{text-align:center;color:var(--sub);font-size:14.5px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th{text-align:left;color:var(--sub);font-weight:600;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)}
+  th.r,td.v{text-align:right}
+  td{padding:6px 0;color:var(--sub)} td.v{color:var(--ink);font-weight:800}
+  td.z{color:var(--ink);font-weight:700}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Heart Rate Zone Calculator</h1>
+    <p>Your five training zones from the Karvonen formula — personalised with your resting heart rate.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Age</label><input id="age" type="number" min="1" max="120" step="1" value="40"></div>
+      <div class="f"><label>Resting heart rate (bpm)</label><input id="rest" type="number" min="20" max="120" step="1" value="60"></div>
+    </div>
+    <div class="big" id="maxOut">-</div>
+    <div class="sub2" id="hrrOut">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><th>Zone</th><th>Intensity</th><th class="r">Heart rate</th></tr>
+      <tr><td class="z">Zone 1 — Recovery</td><td>50–60%</td><td class="v" id="z1">-</td></tr>
+      <tr><td class="z">Zone 2 — Endurance</td><td>60–70%</td><td class="v" id="z2">-</td></tr>
+      <tr><td class="z">Zone 3 — Aerobic</td><td>70–80%</td><td class="v" id="z3">-</td></tr>
+      <tr><td class="z">Zone 4 — Threshold</td><td>80–90%</td><td class="v" id="z4">-</td></tr>
+      <tr><td class="z">Zone 5 — Peak</td><td>90–100%</td><td class="v" id="z5">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">How it works: maximum heart rate is estimated as 220 − age, and each zone boundary is resting HR + (max HR − resting HR) × intensity — the Karvonen, or heart-rate-reserve, method. Because it uses your resting heart rate, the zones shift as your fitness changes. The 220 − age figure is a population average: your true maximum can easily be 10–15 bpm higher or lower, so treat these zones as a starting guide and adjust by how the effort feels. Measure resting heart rate first thing in the morning, lying in bed, for the most consistent value.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+function hrZones(age, rest){
+  const max = 220 - age;
+  const hrr = max - rest;
+  const bounds = [[0.5, 0.6], [0.6, 0.7], [0.7, 0.8], [0.8, 0.9], [0.9, 1.0]];
+  return {
+    max: max,
+    hrr: hrr,
+    zones: bounds.map(b => [Math.round(rest + hrr * b[0]), Math.round(rest + hrr * b[1])])
+  };
+}
+function calc(){
+  const age = num(ageEl.value), rest = num(restEl.value);
+  if(age <= 0 || rest <= 0 || rest >= 220 - age){
+    maxOutEl.textContent = "-";
+    hrrOutEl.textContent = "Enter an age and a resting heart rate below your maximum";
+    zoneEls.forEach(e => e.textContent = "-");
+    return;
+  }
+  const r = hrZones(age, rest);
+  maxOutEl.textContent = r.max + " bpm";
+  hrrOutEl.textContent = "estimated maximum heart rate · heart rate reserve " + r.hrr + " bpm";
+  r.zones.forEach((z, i) => zoneEls[i].textContent = z[0] + "–" + z[1] + " bpm");
+}
+const ageEl = document.getElementById("age"), restEl = document.getElementById("rest");
+const maxOutEl = document.getElementById("maxOut"), hrrOutEl = document.getElementById("hrrOut");
+const zoneEls = ["z1", "z2", "z3", "z4", "z5"].map(id => document.getElementById(id));
+[ageEl, restEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

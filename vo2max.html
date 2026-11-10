@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VO2 Max Calculator — Rockport One-Mile Walk Test</title>
+<meta name="description" content="Estimate your VO2 max from the Rockport one-mile walk test: your time, heart rate at the finish, age, sex and weight. Includes a fitness category table by age and sex.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#4338ca; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .sub2{text-align:center;color:var(--sub);font-size:14.5px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  th{text-align:left;color:var(--sub);font-weight:600;font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)}
+  th.r,td.v{text-align:right}
+  td{padding:6px 0;color:var(--sub)} td.v{color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>VO2 Max Calculator</h1>
+    <p>Estimate your aerobic fitness from the Rockport one-mile walk test.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Sex</label><select id="sex">
+        <option value="1" selected>Male</option>
+        <option value="0">Female</option>
+      </select></div>
+      <div class="f"><label>Age</label><input id="age" type="number" min="1" max="120" step="1" value="40"></div>
+      <div class="f"><label>Units</label><select id="unit"><option value="lb" selected>Pounds (lb)</option><option value="kg">Kilograms (kg)</option></select></div>
+      <div class="f"><label id="wLabel">Weight (lb)</label><input id="weight" type="number" min="1" step="0.1" value="154"></div>
+      <div class="f"><label>Walk time for 1 mile (minutes)</label><input id="time" type="number" min="1" step="0.01" value="15"></div>
+      <div class="f"><label>Heart rate at finish (bpm)</label><input id="hr" type="number" min="40" max="220" step="1" value="120"></div>
+    </div>
+    <div class="big" id="vo2Out">-</div>
+    <div class="sub2" id="catOut">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><th>Age</th><th>Men — Good</th><th>Men — Excellent</th><th>Women — Good</th><th class="r">Women — Excellent</th></tr>
+      <tr><td>20–29</td><td>36.5–42.4</td><td>42.5–52.4</td><td>29.0–32.9</td><td class="v">33.0–41.0</td></tr>
+      <tr><td>30–39</td><td>35.5–40.9</td><td>41.0–49.4</td><td>27.0–31.4</td><td class="v">31.5–40.0</td></tr>
+      <tr><td>40–49</td><td>33.6–38.9</td><td>39.0–48.0</td><td>24.5–28.9</td><td class="v">29.0–36.9</td></tr>
+      <tr><td>50–59</td><td>31.0–35.7</td><td>35.8–45.3</td><td>22.8–26.9</td><td class="v">27.0–35.7</td></tr>
+      <tr><td>60+</td><td>26.1–32.2</td><td>32.3–44.2</td><td>20.2–24.4</td><td class="v">24.5–31.4</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">General reference only: VO2 max ranges in ml/kg/min, simplified from commonly published fitness-category tables. Below "Good" the bands are usually labelled Fair and then Poor; above "Excellent" is Superior.</p>
+    <p class="note">How to take the test: warm up, then walk one mile (1.61 km) on flat ground as fast as you can — walk, don't run — and take your heart rate immediately at the finish. Enter the time in minutes (15.5 for 15 min 30 sec). The Rockport equation was developed on adults aged 30–69 and is an estimate: a lab test is the only direct measurement, and results vary with course, weather and how the heart rate is taken.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const round1 = n => Math.round(n * 10) / 10;
+function vo2Rockport(sex, age, weightLb, timeMin, hr){
+  return 132.853 - 0.0769 * weightLb - 0.3877 * age + 6.315 * sex - 3.2649 * timeMin - 0.1565 * hr;
+}
+const VO2_BANDS = {
+  male:   [[33.0, 36.5, 42.5, 52.5], [31.5, 35.5, 41.0, 49.5], [30.2, 33.6, 39.0, 48.1], [26.1, 31.0, 35.8, 45.4], [20.5, 26.1, 32.3, 44.3]],
+  female: [[23.6, 29.0, 33.0, 41.1], [22.8, 27.0, 31.5, 40.1], [21.0, 24.5, 29.0, 37.0], [20.2, 22.8, 27.0, 35.8], [17.5, 20.2, 24.5, 31.5]]
+};
+function ageBand(age){
+  return age < 30 ? 0 : age < 40 ? 1 : age < 50 ? 2 : age < 60 ? 3 : 4;
+}
+function vo2Category(sex, age, v){
+  const b = VO2_BANDS[sex === 1 ? "male" : "female"][ageBand(age)];
+  if(v < b[0]) return "Poor";
+  if(v < b[1]) return "Fair";
+  if(v < b[2]) return "Good";
+  if(v < b[3]) return "Excellent";
+  return "Superior";
+}
+function calc(){
+  let lb = num(weightEl.value);
+  if(unitEl.value === "kg") lb = lb / 0.45359237;
+  const sex = num(sexEl.value), age = num(ageEl.value), t = num(timeEl.value), hr = num(hrEl.value);
+  if(lb <= 0 || age <= 0 || t <= 0 || hr <= 0){
+    vo2OutEl.textContent = "-";
+    catOutEl.textContent = "Fill in every field to see your estimate";
+    return;
+  }
+  const v = vo2Rockport(sex, age, lb, t, hr);
+  vo2OutEl.textContent = v.toFixed(1) + " ml/kg/min";
+  catOutEl.textContent = "Category for a " + age + "-year-old " + (sex === 1 ? "man" : "woman") + ": " + vo2Category(sex, age, v) + " (general reference)";
+}
+const sexEl = document.getElementById("sex"), ageEl = document.getElementById("age"),
+      weightEl = document.getElementById("weight"), unitEl = document.getElementById("unit"),
+      timeEl = document.getElementById("time"), hrEl = document.getElementById("hr");
+const vo2OutEl = document.getElementById("vo2Out"), catOutEl = document.getElementById("catOut");
+unitEl.addEventListener("input", () => {
+  const toKg = unitEl.value === "kg";
+  document.getElementById("wLabel").textContent = toKg ? "Weight (kg)" : "Weight (lb)";
+  if(num(weightEl.value) > 0) weightEl.value = round1(toKg ? num(weightEl.value) * 0.45359237 : num(weightEl.value) / 0.45359237);
+  calc();
+});
+[sexEl, ageEl, weightEl, timeEl, hrEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>
