@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macro Calculator — Protein, Fat & Carbs in Grams per Day</title>
+<meta name="description" content="Turn a daily calorie target into grams of protein, fat and carbohydrates with balanced, high-protein and low-carb preset splits.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#059669; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Macro Calculator</h1>
+    <p>Convert a daily calorie target into grams of protein, fat and carbohydrates.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Daily calories (kcal)</label><input id="kcal" type="number" min="0" step="50" value="2500"></div>
+      <div class="f"><label>Split preset</label><select id="preset">
+        <option value="balanced" selected>Balanced (P30 / F25 / C45)</option>
+        <option value="highprotein">High-Protein (P40 / F25 / C35)</option>
+        <option value="lowcarb">Low-Carb (P35 / F45 / C20)</option>
+      </select></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td id="pLab">Protein</td><td class="v" id="pG">-</td></tr>
+      <tr><td id="fLab">Fat</td><td class="v" id="fG">-</td></tr>
+      <tr><td id="cLab">Carbohydrates</td><td class="v" id="cG">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Grams are calculated at 4 kcal per gram for protein and carbohydrates and 9 kcal per gram for fat, using each macro's share of your total calories. These splits are common starting points, not personal recommendations — the right balance depends on your goals, training, body composition and health. If you are not sure what calorie target to use, estimate it with the <a href="tdee.html">TDEE Calculator</a> first, and consult a registered dietitian for personalised nutrition advice.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const round1 = n => Math.round(n * 10) / 10;
+const SPLITS = {
+  balanced:    { p: 30, f: 25, c: 45 },
+  highprotein: { p: 40, f: 25, c: 35 },
+  lowcarb:     { p: 35, f: 45, c: 20 }
+};
+function calc(){
+  const kcal = num(kcalEl.value);
+  const s = SPLITS[presetEl.value] || SPLITS.balanced;
+  if(kcal <= 0){ pGEl.textContent = fGEl.textContent = cGEl.textContent = "-"; return; }
+  const pK = kcal * s.p / 100, fK = kcal * s.f / 100, cK = kcal * s.c / 100;
+  pLabEl.textContent = "Protein (" + s.p + "% — " + Math.round(pK).toLocaleString("en-US") + " kcal)";
+  fLabEl.textContent = "Fat (" + s.f + "% — " + Math.round(fK).toLocaleString("en-US") + " kcal)";
+  cLabEl.textContent = "Carbohydrates (" + s.c + "% — " + Math.round(cK).toLocaleString("en-US") + " kcal)";
+  pGEl.textContent = round1(pK / 4).toLocaleString("en-US") + " g";
+  fGEl.textContent = round1(fK / 9).toLocaleString("en-US") + " g";
+  cGEl.textContent = round1(cK / 4).toLocaleString("en-US") + " g";
+}
+const kcalEl = document.getElementById("kcal"), presetEl = document.getElementById("preset");
+const pLabEl = document.getElementById("pLab"), fLabEl = document.getElementById("fLab"), cLabEl = document.getElementById("cLab");
+const pGEl = document.getElementById("pG"), fGEl = document.getElementById("fG"), cGEl = document.getElementById("cG");
+[kcalEl, presetEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>
