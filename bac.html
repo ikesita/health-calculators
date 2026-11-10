@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood Alcohol Calculator (BAC) — Widmark Estimate</title>
+<meta name="description" content="Roughly estimate blood alcohol content with the Widmark formula from your sex, body weight, pure alcohol consumed and time elapsed. An estimate only — never drive after drinking.">
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#dc2626; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .sub2{text-align:center;color:var(--sub);font-size:14.5px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .warn{background:#fef2f2;border:1px solid #fecaca;border-radius:14px;padding:18px;margin-bottom:16px}
+  .warn strong{color:#b91c1c}
+  .warn p{margin:0;font-size:14.5px}
+  .note{font-size:13px;color:var(--sub)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Blood Alcohol Calculator (BAC)</h1>
+    <p>A rough estimate of blood alcohol content using the Widmark formula.</p>
+  </header>
+
+  <div class="warn">
+    <p><strong>Never drive after drinking.</strong> This calculator gives a very rough estimate only. Your actual blood alcohol level depends on food, body composition, medications, health and how fast you drank, and it can be considerably higher than shown here. Any amount of alcohol impairs driving — a low estimate is never a permission to drive.</p>
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Sex</label><select id="sex">
+        <option value="male" selected>Male</option>
+        <option value="female">Female</option>
+      </select></div>
+      <div class="f"><label id="wLabel">Weight (kg)</label><input id="weight" type="number" min="1" step="0.1" value="70"></div>
+      <div class="f"><label>Units</label><select id="unit"><option value="kg" selected>Kilograms (kg)</option><option value="lb">Pounds (lb)</option></select></div>
+      <div class="f"><label>Drink preset (sets the grams)</label><select id="preset">
+        <option value="custom" selected>Custom amount</option>
+        <option value="20">Beer 500 ml (5%) — ≈ 20 g</option>
+        <option value="14">Beer 350 ml (5%) — ≈ 14 g</option>
+        <option value="14">Wine 150 ml (12%) — ≈ 14 g</option>
+        <option value="21">Sake 180 ml (15%) — ≈ 21 g</option>
+        <option value="9">Whisky / spirits 30 ml (40%) — ≈ 9 g</option>
+      </select></div>
+      <div class="f"><label>Pure alcohol (grams)</label><input id="grams" type="number" min="0" step="0.5" value="40"></div>
+      <div class="f"><label>Hours since drinking started</label><input id="hours" type="number" min="0" step="0.25" value="0"></div>
+    </div>
+    <div class="big" id="bacPct">-</div>
+    <div class="sub2" id="bacPermille">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Pure alcohol consumed</td><td class="v" id="gRow">-</td></tr>
+      <tr><td>Distribution factor (r × body weight)</td><td class="v" id="volRow">-</td></tr>
+      <tr><td>Estimated elimination (0.15 ‰ per hour)</td><td class="v" id="elimRow">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">How it works: BAC (‰) = alcohol in grams ÷ (body weight in kg × r) − 0.15 ‰ × hours, where r is 0.68 for men and 0.55 for women. The result is shown as a percentage (‰ ÷ 10). Pure alcohol in grams ≈ drink volume (ml) × strength (ABV %) × 0.008 — for example, a 500 ml beer at 5% is about 20 g. Two of those beers is the 40 g default above. The formula assumes the alcohol is fully absorbed instantly, which is not how drinking works in real life, so treat the number as a lower-bound guide, not a measurement.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const round1 = n => Math.round(n * 10) / 10;
+function calc(){
+  let kg = num(weightEl.value);
+  if(unitEl.value === "lb") kg = kg * 0.45359237;
+  const r = sexEl.value === "female" ? 0.55 : 0.68;
+  const g = num(gramsEl.value), hrs = num(hoursEl.value);
+  if(kg <= 0){ bacPctEl.textContent = "-"; bacPermilleEl.textContent = ""; return; }
+  let permille = g / (kg * r) - 0.15 * hrs;
+  if(permille < 0) permille = 0;
+  bacPctEl.textContent = (permille / 10).toFixed(3) + " %";
+  bacPermilleEl.textContent = "≈ " + permille.toFixed(2) + " ‰ (per mille) blood alcohol";
+  gRowEl.textContent = g.toLocaleString("en-US") + " g";
+  volRowEl.textContent = "r " + r + " × " + round1(kg) + " kg";
+  elimRowEl.textContent = "−" + (0.15 * hrs).toFixed(2) + " ‰ over " + hrs + " h";
+}
+const sexEl = document.getElementById("sex"), weightEl = document.getElementById("weight"), unitEl = document.getElementById("unit"),
+      presetEl = document.getElementById("preset"), gramsEl = document.getElementById("grams"), hoursEl = document.getElementById("hours");
+const bacPctEl = document.getElementById("bacPct"), bacPermilleEl = document.getElementById("bacPermille"),
+      gRowEl = document.getElementById("gRow"), volRowEl = document.getElementById("volRow"), elimRowEl = document.getElementById("elimRow");
+unitEl.addEventListener("input", () => {
+  const toLb = unitEl.value === "lb";
+  document.getElementById("wLabel").textContent = toLb ? "Weight (lb)" : "Weight (kg)";
+  if(num(weightEl.value) > 0) weightEl.value = round1(toLb ? num(weightEl.value) / 0.45359237 : num(weightEl.value) * 0.45359237);
+  calc();
+});
+presetEl.addEventListener("input", () => {
+  if(presetEl.value !== "custom") gramsEl.value = presetEl.value;
+  calc();
+});
+gramsEl.addEventListener("input", () => { presetEl.value = "custom"; calc(); });
+[sexEl, weightEl, hoursEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>
