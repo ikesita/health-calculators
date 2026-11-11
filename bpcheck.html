@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blood Pressure Category Checker — ACC/AHA Categories</title>
+<meta name="description" content="Enter a systolic and diastolic reading to see its category under the ACC/AHA blood pressure guidelines: normal, elevated, stage 1, stage 2 or hypertensive crisis.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Blood Pressure Category Checker",
+  "url": "https://ikesita.github.io/health-calculators/bpcheck.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Classify a blood pressure reading into the ACC/AHA categories: normal, elevated, stage 1 hypertension, stage 2 hypertension, or hypertensive crisis.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What blood pressure is considered normal?", "acceptedAnswer": { "@type": "Answer", "text": "Under the ACC/AHA guidelines, normal blood pressure is a systolic below 120 mm Hg AND a diastolic below 80 mm Hg. Elevated is 120–129 with diastolic still below 80; stage 1 hypertension starts at 130 systolic or 80 diastolic." } },
+    { "@type": "Question", "name": "Which number matters more, systolic or diastolic?", "acceptedAnswer": { "@type": "Answer", "text": "Both matter. Your category is set by whichever of the two numbers falls into the higher category — for example, 118/85 is stage 1 hypertension because of the diastolic value, even though the systolic value is normal." } },
+    { "@type": "Question", "name": "Can one reading diagnose high blood pressure?", "acceptedAnswer": { "@type": "Answer", "text": "No. The ACC/AHA guideline bases diagnosis on the average of at least two careful readings taken on at least two separate occasions. A single reading — especially a first one — is only a screening result." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#dc2626; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:32px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:18px;color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  tr.hl td{color:var(--acc);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Blood Pressure Category Checker</h1>
+    <p>What category is your reading in? Based on the ACC/AHA blood pressure guidelines for adults.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Systolic (top number, mm Hg)</label><input id="sys" type="number" min="50" max="260" step="1" value="128"></div>
+      <div class="f"><label>Diastolic (bottom number, mm Hg)</label><input id="dia" type="number" min="30" max="180" step="1" value="82"></div>
+    </div>
+    <div class="big" id="reading">-</div>
+    <div class="cat" id="catOut">-</div>
+    <p class="note" id="advice" style="text-align:center;margin-top:6px">-</p>
+  </div>
+
+  <div class="card">
+    <table id="bpTable">
+      <tr><td colspan="2" style="color:var(--ink);font-weight:800">ACC/AHA categories (adults)</td></tr>
+      <tr data-lvl="0"><td>Normal</td><td class="v">Systolic &lt; 120 AND diastolic &lt; 80</td></tr>
+      <tr data-lvl="1"><td>Elevated</td><td class="v">Systolic 120–129 AND diastolic &lt; 80</td></tr>
+      <tr data-lvl="2"><td>Stage 1 hypertension</td><td class="v">Systolic 130–139 OR diastolic 80–89</td></tr>
+      <tr data-lvl="3"><td>Stage 2 hypertension</td><td class="v">Systolic ≥ 140 OR diastolic ≥ 90</td></tr>
+      <tr data-lvl="4"><td>Hypertensive crisis</td><td class="v">Systolic &gt; 180 AND/OR diastolic &gt; 120</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Source: ACC/AHA Guideline for the Prevention, Detection, Evaluation, and Management of High Blood Pressure in Adults (2017). Your category is set by whichever number falls in the higher category. Diagnosis is based on the average of two or more readings on two or more occasions — one reading does not diagnose hypertension. Measure seated, after 5 minutes of rest, with the right cuff size, and don't talk during the measurement. This checker is a general information tool, not medical advice.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>What blood pressure is considered normal?</b><br>Systolic below 120 <i>and</i> diastolic below 80. Stage 1 hypertension begins at 130 systolic or 80 diastolic.</p>
+    <p><b>Which number matters more?</b><br>Both — the higher of the two categories wins. A reading of 118/85 is stage 1 because of the diastolic value.</p>
+    <p style="margin-bottom:0"><b>Can one reading diagnose high blood pressure?</b><br>No. Guidelines use the average of at least two careful readings on at least two occasions. Home readings over several days give a much better picture.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+function sysLevel(s){
+  if(s > 180) return 4;
+  if(s >= 140) return 3;
+  if(s >= 130) return 2;
+  if(s >= 120) return 1;
+  return 0;
+}
+function diaLevel(d){
+  if(d > 120) return 4;
+  if(d >= 90) return 3;
+  if(d >= 80) return 2;
+  return 0; // note: diastolic has no "elevated" (level 1) band in ACC/AHA
+}
+const LEVELS = [
+  { name: "Normal", advice: "Keep up healthy habits and re-check at least once a year." },
+  { name: "Elevated", advice: "Not hypertension yet, but above normal. Lifestyle changes and yearly re-checks are recommended." },
+  { name: "Stage 1 hypertension", advice: "Talk to a doctor about this reading — guidelines recommend confirming it with repeated measurements." },
+  { name: "Stage 2 hypertension", advice: "See a doctor promptly. Readings in this range usually need treatment and follow-up." },
+  { name: "Hypertensive crisis", advice: "This range needs urgent medical attention — especially if you have chest pain, breathlessness, vision changes or weakness. Seek care now." }
+];
+function calc(){
+  const s = num(sysEl.value), d = num(diaEl.value);
+  if(s <= 0 || d <= 0) return;
+  const lvl = Math.max(sysLevel(s), diaLevel(d));
+  readingEl.textContent = s + " / " + d + " mm Hg";
+  catOutEl.textContent = LEVELS[lvl].name;
+  adviceEl.textContent = LEVELS[lvl].advice;
+  document.querySelectorAll("#bpTable tr[data-lvl]").forEach(tr => tr.classList.toggle("hl", parseInt(tr.dataset.lvl) === lvl));
+}
+const sysEl = document.getElementById("sys"), diaEl = document.getElementById("dia");
+const readingEl = document.getElementById("reading"), catOutEl = document.getElementById("catOut"), adviceEl = document.getElementById("advice");
+[sysEl, diaEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

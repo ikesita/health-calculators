@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calories Burned Calculator — Burn by Activity (MET-Based)</title>
+<meta name="description" content="Estimate calories burned for walking, running, cycling, swimming and more, from your weight and workout duration, using standard MET values from the Compendium of Physical Activities.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Calories Burned by Activity Calculator",
+  "url": "https://ikesita.github.io/health-calculators/caloriesburned.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Estimate calories burned during walking, running, cycling, swimming and other activities using MET values from the Compendium of Physical Activities.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How are calories burned calculated from METs?", "acceptedAnswer": { "@type": "Answer", "text": "Calories per minute = MET × 3.5 × body weight in kg ÷ 200. A MET is a multiple of resting energy use, and the MET values come from the Compendium of Physical Activities (Ainsworth et al.)." } },
+    { "@type": "Question", "name": "Why does body weight change the calories burned?", "acceptedAnswer": { "@type": "Answer", "text": "Moving a heavier body takes more energy, so the same workout burns more calories at a higher body weight. That is why two people doing the same run can see quite different calorie numbers." } },
+    { "@type": "Question", "name": "How accurate are these calorie estimates?", "acceptedAnswer": { "@type": "Answer", "text": "They are population averages. Fitness trackers and this calculator can each be off by 10–25% for an individual because efficiency, fitness and technique vary. Use the numbers to compare activities, not as exact measurements." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#ea580c; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:16px;color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Calories Burned by Activity</h1>
+    <p>How many calories does your workout burn? Estimates from MET values in the Compendium of Physical Activities.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Activity</label><select id="act"></select></div>
+      <div class="f"><label id="wLabel">Weight (kg)</label><input id="weight" type="number" min="25" max="300" step="0.1" value="70"></div>
+      <div class="f"><label>Duration (minutes)</label><input id="mins" type="number" min="1" max="1440" step="1" value="30"></div>
+    </div>
+    <div class="f" style="margin-top:12px"><label>Weight unit</label><select id="unit"><option value="kg">Kilograms (kg)</option><option value="lb">Pounds (lb)</option></select></div>
+    <div class="big" id="kcal">-</div>
+    <div class="cat" id="rate">-</div>
+  </div>
+
+  <div class="card">
+    <h2>All activities for 30 minutes at your weight</h2>
+    <table id="allTable"></table>
+    <p class="note" style="margin-top:10px">Formula: calories per minute = MET × 3.5 × weight (kg) ÷ 200. MET values: Compendium of Physical Activities (Ainsworth et al., 2011 update). These are averages for a typical adult — individual burn varies with fitness, efficiency and conditions, often by 10–25%. This is a general estimate, not a measurement.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>How are calories burned calculated from METs?</b><br>Calories per minute = MET × 3.5 × body weight in kg ÷ 200. One MET is your resting energy use; running at 6 mph is 9.8 METs, so it uses about 9.8 times the resting rate.</p>
+    <p><b>Why does body weight matter?</b><br>Moving a heavier body takes more energy, so the same activity burns more calories at a higher weight.</p>
+    <p style="margin-bottom:0"><b>How accurate is this?</b><br>Treat it as a comparison guide between activities. Trackers and formulas can each be off by 10–25% for an individual.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+// MET values from the Compendium of Physical Activities (Ainsworth et al., 2011)
+const ACTIVITIES = [
+  ["Walking, 2.5 mph (4.0 km/h), level", 3.0],
+  ["Walking, 3.5 mph (5.6 km/h), brisk", 4.3],
+  ["Hiking, cross country", 6.0],
+  ["Running, 5 mph (8.0 km/h)", 8.3],
+  ["Running, 6 mph (9.7 km/h)", 9.8],
+  ["Running, 8 mph (12.9 km/h)", 11.8],
+  ["Cycling, leisure, under 10 mph", 4.0],
+  ["Cycling, 12–13.9 mph (19–22 km/h)", 8.0],
+  ["Swimming, leisurely", 6.0],
+  ["Swimming, laps, vigorous", 9.8],
+  ["Rowing machine, moderate effort", 7.0],
+  ["Elliptical trainer, moderate effort", 5.0],
+  ["Aerobics, general", 7.3],
+  ["Weight lifting, vigorous effort", 6.0],
+  ["Yoga, Hatha", 2.5]
+];
+function kcalBurn(met, kg, mins){ return met * 3.5 * kg / 200 * mins; }
+function weightKg(){
+  const w = num(wEl.value);
+  return unitEl.value === "lb" ? w * 0.45359237 : w;
+}
+function calc(){
+  const kg = weightKg(), mins = num(minsEl.value);
+  if(kg <= 0 || mins <= 0) return;
+  const met = ACTIVITIES[num(actEl.value)][1];
+  const total = kcalBurn(met, kg, mins);
+  kcalEl.textContent = Math.round(total).toLocaleString("en-US") + " kcal";
+  rateEl.textContent = (total / mins).toFixed(1) + " kcal per minute · " + Math.round(total / mins * 60).toLocaleString("en-US") + " kcal per hour";
+  allTableEl.innerHTML = ACTIVITIES.map(a =>
+    "<tr><td>" + a[0] + " (" + a[1].toFixed(1) + " MET)</td><td class='v'>" + Math.round(kcalBurn(a[1], kg, 30)).toLocaleString("en-US") + " kcal</td></tr>"
+  ).join("");
+}
+const actEl = document.getElementById("act"), wEl = document.getElementById("weight"),
+      minsEl = document.getElementById("mins"), unitEl = document.getElementById("unit"),
+      wLabelEl = document.getElementById("wLabel");
+const kcalEl = document.getElementById("kcal"), rateEl = document.getElementById("rate"), allTableEl = document.getElementById("allTable");
+actEl.innerHTML = ACTIVITIES.map((a, i) => "<option value='" + i + "'" + (a[1] === 9.8 && a[0].indexOf("Running, 6") === 0 ? " selected" : "") + ">" + a[0] + "</option>").join("");
+unitEl.addEventListener("input", () => {
+  const lb = unitEl.value === "lb";
+  wLabelEl.textContent = lb ? "Weight (lb)" : "Weight (kg)";
+  wEl.value = lb ? 154 : 70;
+  calc();
+});
+[actEl, wEl, minsEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

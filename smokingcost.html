@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smoking Cost Calculator — What Smoking Has Cost You &amp; Will Cost You</title>
+<meta name="description" content="How much has smoking cost you so far, and how much will the next 10, 20 and 30 years cost if you continue? Enter cigarettes per day and pack price to see the total.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Smoking Cost Calculator",
+  "url": "https://ikesita.github.io/health-calculators/smokingcost.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Calculate how much money smoking has cost over the years smoked, the yearly cost, and the projected cost of continuing for 10, 20 and 30 more years.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How much does a pack-a-day smoker spend in a year?", "acceptedAnswer": { "@type": "Answer", "text": "At $8 per pack, one pack a day costs $8 × 365.25 ≈ $2,922 per year — about $29,220 over ten years, not counting price rises. Enter your own pack price to get your number." } },
+    { "@type": "Question", "name": "Does this calculator include health costs or lost income?", "acceptedAnswer": { "@type": "Answer", "text": "No. It counts only the purchase price of the cigarettes themselves. The full economic cost of smoking — healthcare, lost earnings, insurance — is considerably larger." } },
+    { "@type": "Question", "name": "How much would I save by quitting now?", "acceptedAnswer": { "@type": "Answer", "text": "Exactly the 'if you keep smoking' figures: every future projection in this calculator is money you would not spend if you stopped today, assuming prices stay the same." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#57534e; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:16px;color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Smoking Cost Calculator</h1>
+    <p>What smoking has already cost you — and what it will cost if you keep going.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Cigarettes per day</label><input id="cpd" type="number" min="1" max="200" step="1" value="20"></div>
+      <div class="f"><label>Price per pack (your currency)</label><input id="price" type="number" min="0.1" step="0.1" value="8"></div>
+      <div class="f"><label>Cigarettes per pack</label><input id="perpack" type="number" min="1" max="100" step="1" value="20"></div>
+      <div class="f"><label>Years smoked</label><input id="years" type="number" min="0" max="90" step="0.5" value="10"></div>
+    </div>
+    <div class="big" id="totalSpent">-</div>
+    <div class="cat" id="totalLabel">total spent so far</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Cost per day</td><td class="v" id="perDay">-</td></tr>
+      <tr><td>Cost per month</td><td class="v" id="perMonth">-</td></tr>
+      <tr><td>Cost per year</td><td class="v" id="perYear">-</td></tr>
+      <tr><td>Cigarettes smoked so far</td><td class="v" id="cigsTotal">-</td></tr>
+      <tr><td>Packs smoked so far</td><td class="v" id="packsTotal">-</td></tr>
+    </table>
+    <table style="margin-top:12px">
+      <tr><td colspan="2" style="color:var(--ink);font-weight:800">If you keep smoking at the same rate — this is also what quitting today saves</td></tr>
+      <tr><td>Next 10 years</td><td class="v" id="fut10">-</td></tr>
+      <tr><td>Next 20 years</td><td class="v" id="fut20">-</td></tr>
+      <tr><td>Next 30 years</td><td class="v" id="fut30">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Simple arithmetic: cost per day = (cigarettes per day ÷ cigarettes per pack) × pack price, using 365.25 days per year. Prices are held constant — in reality tobacco prices usually rise, so future costs are likely understated. Only the purchase price is counted; healthcare costs and lost income are not included.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>How much does a pack-a-day smoker spend in a year?</b><br>At $8 a pack: about $2,922 a year, and about $29,220 over ten years — before any price increases.</p>
+    <p><b>Does this include health costs?</b><br>No — only the purchase price of the cigarettes. The wider economic cost of smoking is much larger.</p>
+    <p style="margin-bottom:0"><b>How much would quitting save?</b><br>The full "next 10/20/30 years" figures above. Most people who quit also report the money shows up surprisingly fast — the daily figure is the place to start.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const DAYS_YEAR = 365.25;
+function money(n){ return "$" + Math.round(n).toLocaleString("en-US"); }
+function smokingCalc(cpd, price, perPack, years){
+  const perDayCost = (cpd / perPack) * price;
+  const perYearCost = perDayCost * DAYS_YEAR;
+  return {
+    perDay: perDayCost,
+    perMonth: perYearCost / 12,
+    perYear: perYearCost,
+    total: perYearCost * years,
+    cigs: cpd * DAYS_YEAR * years,
+    packs: (cpd / perPack) * DAYS_YEAR * years,
+    fut10: perYearCost * 10,
+    fut20: perYearCost * 20,
+    fut30: perYearCost * 30
+  };
+}
+function calc(){
+  const cpd = num(cpdEl.value), price = num(priceEl.value), pp = num(ppEl.value), yrs = num(yearsEl.value);
+  if(cpd <= 0 || price <= 0 || pp <= 0) return;
+  const r = smokingCalc(cpd, price, pp, yrs);
+  totalEl.textContent = money(r.total);
+  perDayEl.textContent = money(r.perDay);
+  perMonthEl.textContent = money(r.perMonth);
+  perYearEl.textContent = money(r.perYear);
+  cigsEl.textContent = Math.round(r.cigs).toLocaleString("en-US");
+  packsEl.textContent = Math.round(r.packs).toLocaleString("en-US");
+  fut10El.textContent = money(r.fut10);
+  fut20El.textContent = money(r.fut20);
+  fut30El.textContent = money(r.fut30);
+}
+const cpdEl = document.getElementById("cpd"), priceEl = document.getElementById("price"),
+      ppEl = document.getElementById("perpack"), yearsEl = document.getElementById("years");
+const totalEl = document.getElementById("totalSpent"), perDayEl = document.getElementById("perDay"),
+      perMonthEl = document.getElementById("perMonth"), perYearEl = document.getElementById("perYear"),
+      cigsEl = document.getElementById("cigsTotal"), packsEl = document.getElementById("packsTotal");
+const fut10El = document.getElementById("fut10"), fut20El = document.getElementById("fut20"), fut30El = document.getElementById("fut30");
+[cpdEl, priceEl, ppEl, yearsEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

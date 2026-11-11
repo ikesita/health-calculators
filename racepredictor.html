@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Race Time Predictor — Riegel Formula Finish Time Predictions</title>
+<meta name="description" content="Predict your 5K, 10K, half marathon and marathon finish times from a recent race result using the Riegel formula (exponent 1.06) — the standard endurance prediction model.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Race Time Predictor (Riegel Formula)",
+  "url": "https://ikesita.github.io/health-calculators/racepredictor.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Predict finish times for 5K, 10K, half marathon and marathon from a recent race result using Peter Riegel's formula: T2 = T1 × (D2/D1)^1.06.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is the Riegel formula?", "acceptedAnswer": { "@type": "Answer", "text": "The Riegel formula, published by researcher Peter Riegel in 1977, predicts a finish time at one distance from a finish time at another: T2 = T1 × (D2 ÷ D1)^1.06. The exponent 1.06 captures the typical slowdown as race distance increases." } },
+    { "@type": "Question", "name": "How accurate is the Riegel formula?", "acceptedAnswer": { "@type": "Answer", "text": "It works best when the two distances are reasonably close and you are equally well trained for both. Predictions across a big gap — say, from a 5K to a marathon — are much less reliable, and the formula assumes similar terrain, weather and fitness on the day." } },
+    { "@type": "Question", "name": "Why does this differ from a constant-pace projection?", "acceptedAnswer": { "@type": "Answer", "text": "A constant-pace projection assumes you can hold the same pace at every distance, which nobody can. The Riegel exponent bends the curve: your predicted pace gets slower as the target distance grows, matching how endurance performance actually scales." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#2563eb; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .row input{width:78px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .row input.dist{width:120px}
+  .row select{padding:9px;border:1px solid var(--line);border-radius:8px;font-size:15px}
+  .row label{font-size:13px;color:var(--sub)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  th{padding:6px 0;color:var(--sub);font-size:13px;text-align:right;font-weight:600} th:first-child{text-align:left}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Race Time Predictor</h1>
+    <p>Enter a recent race result and predict your finish times at other distances with the Riegel formula.</p>
+  </header>
+
+  <div class="card">
+    <h2>Your recent race</h2>
+    <div class="row" style="margin-bottom:12px">
+      <label>Race</label>
+      <select id="preset">
+        <option value="5">5K</option>
+        <option value="10" selected>10K</option>
+        <option value="21.0975">Half marathon</option>
+        <option value="42.195">Marathon</option>
+        <option value="custom">Custom distance…</option>
+      </select>
+      <label>Distance (km)</label><input class="dist" id="dist" type="number" min="0.1" step="0.001" value="10">
+    </div>
+    <div class="row">
+      <label>Finish time</label>
+      <input id="hh" type="number" min="0" value="0"><span>h</span>
+      <input id="mm" type="number" min="0" max="59" value="50"><span>m</span>
+      <input id="ss" type="number" min="0" max="59" value="0"><span>s</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><th>Distance</th><th>Predicted time</th><th>Pace /km</th><th>Pace /mile</th></tr>
+      <tr><td>5K</td><td class="v" id="t5">-</td><td class="v" id="pk5">-</td><td class="v" id="pm5">-</td></tr>
+      <tr><td>10K</td><td class="v" id="t10">-</td><td class="v" id="pk10">-</td><td class="v" id="pm10">-</td></tr>
+      <tr><td>Half marathon</td><td class="v" id="tHalf">-</td><td class="v" id="pkHalf">-</td><td class="v" id="pmHalf">-</td></tr>
+      <tr><td>Marathon</td><td class="v" id="tFull">-</td><td class="v" id="pkFull">-</td><td class="v" id="pmFull">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Formula: T<sub>2</sub> = T<sub>1</sub> × (D<sub>2</sub>/D<sub>1</sub>)<sup>1.06</sup>, from Peter Riegel, "Athletic Records and Human Endurance", <i>American Scientist</i> 69(3), 1981 (first published 1977). Unlike a constant-pace projection, the 1.06 exponent accounts for the normal slowdown over longer distances. Predictions assume similar fitness, terrain and conditions, and work best between distances that are not too far apart — treat a 5K-to-marathon prediction as a rough guide only.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>What is the Riegel formula?</b><br>T<sub>2</sub> = T<sub>1</sub> × (D<sub>2</sub> ÷ D<sub>1</sub>)<sup>1.06</sup>. The exponent 1.06 reflects the typical relationship between endurance performance at different distances.</p>
+    <p><b>How accurate is it?</b><br>Best when the distances are close and you trained specifically for both. It tends to be optimistic for marathons predicted from short races if your endurance training is limited.</p>
+    <p style="margin-bottom:0"><b>Why not just hold the same pace?</b><br>Because nobody can. Even world-record performances slow per-kilometer as distance grows — the exponent models that slowdown.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const MILE_KM = 1.609344;
+const EXP = 1.06;
+function riegel(t1, d1, d2){ return t1 * Math.pow(d2 / d1, EXP); }
+function fmtTime(totalSec){
+  totalSec = Math.round(totalSec);
+  const h = Math.floor(totalSec / 3600), m = Math.floor((totalSec % 3600) / 60), s = totalSec % 60;
+  return (h > 0 ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0");
+}
+function fmtPace(secPerKm, perMile){
+  const s = perMile ? secPerKm * MILE_KM : secPerKm;
+  const m = Math.floor(s / 60), ss = Math.round(s % 60);
+  return m + ":" + String(ss).padStart(2, "0");
+}
+function setRow(tEl, pkEl, pmEl, secs, distKm){
+  tEl.textContent = fmtTime(secs);
+  pkEl.textContent = fmtPace(secs / distKm, false);
+  pmEl.textContent = fmtPace(secs / distKm, true);
+}
+function calc(){
+  const d1 = num(distEl.value);
+  const t1 = num(hhEl.value) * 3600 + num(mmEl.value) * 60 + num(ssEl.value);
+  if(d1 <= 0 || t1 <= 0) return;
+  setRow(t5El, pk5El, pm5El, riegel(t1, d1, 5), 5);
+  setRow(t10El, pk10El, pm10El, riegel(t1, d1, 10), 10);
+  setRow(tHalfEl, pkHalfEl, pmHalfEl, riegel(t1, d1, 21.0975), 21.0975);
+  setRow(tFullEl, pkFullEl, pmFullEl, riegel(t1, d1, 42.195), 42.195);
+}
+const presetEl = document.getElementById("preset"), distEl = document.getElementById("dist");
+const hhEl = document.getElementById("hh"), mmEl = document.getElementById("mm"), ssEl = document.getElementById("ss");
+const t5El = document.getElementById("t5"), pk5El = document.getElementById("pk5"), pm5El = document.getElementById("pm5");
+const t10El = document.getElementById("t10"), pk10El = document.getElementById("pk10"), pm10El = document.getElementById("pm10");
+const tHalfEl = document.getElementById("tHalf"), pkHalfEl = document.getElementById("pkHalf"), pmHalfEl = document.getElementById("pmHalf");
+const tFullEl = document.getElementById("tFull"), pkFullEl = document.getElementById("pkFull"), pmFullEl = document.getElementById("pmFull");
+presetEl.addEventListener("input", () => {
+  if(presetEl.value !== "custom") distEl.value = presetEl.value;
+  calc();
+});
+[distEl, hhEl, mmEl, ssEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

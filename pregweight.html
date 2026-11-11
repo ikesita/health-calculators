@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pregnancy Weight Gain Calculator — IOM Guidelines by Pre-Pregnancy BMI</title>
+<meta name="description" content="How much weight should you gain during pregnancy? Recommended total gain and expected gain for your current week, using the IOM guidelines based on your pre-pregnancy BMI.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Pregnancy Weight Gain Calculator",
+  "url": "https://ikesita.github.io/health-calculators/pregweight.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Recommended pregnancy weight gain by pre-pregnancy BMI, using the Institute of Medicine (IOM) guidelines, with the expected gain range for your current week.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How much weight should I gain during pregnancy?", "acceptedAnswer": { "@type": "Answer", "text": "It depends on your BMI before pregnancy. The IOM guidelines recommend 12.5–18 kg if you were underweight, 11.5–16 kg for a healthy weight, 7–11.5 kg if overweight, and 5–9 kg if you had obesity before pregnancy." } },
+    { "@type": "Question", "name": "How much weight gain is expected in the first trimester?", "acceptedAnswer": { "@type": "Answer", "text": "Most guidelines assume a total gain of about 0.5–2 kg across the whole first trimester, with the steadier weekly rate applying from the second trimester onward." } },
+    { "@type": "Question", "name": "What if I am carrying twins?", "acceptedAnswer": { "@type": "Answer", "text": "The IOM gives provisional twin guidelines: 16.8–24.5 kg for a healthy pre-pregnancy weight, 14.1–22.7 kg if overweight, and 11.3–19.1 kg with obesity. No guideline was set for twins when underweight, due to insufficient data." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#db2777; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:30px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:17px;color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  tr.hl td{color:var(--acc);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Pregnancy Weight Gain Calculator</h1>
+    <p>Recommended weight gain for your pregnancy, based on your BMI before pregnancy (Institute of Medicine guidelines).</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Your height (cm)</label><input id="height" type="number" min="120" max="220" step="0.1" value="165"></div>
+      <div class="f"><label>Weight before pregnancy (kg)</label><input id="pre" type="number" min="30" max="250" step="0.1" value="60"></div>
+      <div class="f"><label>Current week of pregnancy</label><input id="week" type="number" min="1" max="42" step="1" value="20"></div>
+      <div class="f"><label>Current weight (kg, optional)</label><input id="cur" type="number" min="0" max="300" step="0.1" placeholder="optional"></div>
+      <div class="f"><label>Pregnancy type</label><select id="type"><option value="single">One baby (singleton)</option><option value="twin">Twins</option></select></div>
+    </div>
+    <div class="big" id="totalGain">-</div>
+    <div class="cat" id="catLine">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Your pre-pregnancy BMI</td><td class="v" id="bmiOut">-</td></tr>
+      <tr><td>BMI category</td><td class="v" id="bmiCat">-</td></tr>
+      <tr><td>Recommended rate of gain (2nd &amp; 3rd trimester)</td><td class="v" id="rateOut">-</td></tr>
+      <tr><td>Expected gain by week <span id="weekEcho">20</span></td><td class="v" id="expectedOut">-</td></tr>
+      <tr><td>Your gain so far</td><td class="v" id="gainOut">-</td></tr>
+      <tr><td>Compared with the expected range</td><td class="v" id="verdictOut">-</td></tr>
+    </table>
+    <table style="margin-top:12px" id="guideTable">
+      <tr><td colspan="2" style="color:var(--ink);font-weight:800">IOM recommended total gain (singleton)</td></tr>
+      <tr data-cat="under"><td>Underweight (BMI &lt; 18.5)</td><td class="v">12.5 – 18 kg</td></tr>
+      <tr data-cat="normal"><td>Healthy weight (BMI 18.5 – 24.9)</td><td class="v">11.5 – 16 kg</td></tr>
+      <tr data-cat="over"><td>Overweight (BMI 25 – 29.9)</td><td class="v">7 – 11.5 kg</td></tr>
+      <tr data-cat="obese"><td>Obesity (BMI ≥ 30)</td><td class="v">5 – 9 kg</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Source: Institute of Medicine (IOM), <i>Weight Gain During Pregnancy: Reexamining the Guidelines</i> (2009). The expected gain by week assumes 0.5–2 kg total in the first trimester, then the recommended weekly rate from week 14. Individual targets vary — your doctor or midwife may set a different goal for you. This is a general estimate, not medical advice.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>How much weight should I gain during pregnancy?</b><br>It depends on your BMI before pregnancy: 12.5–18 kg if underweight, 11.5–16 kg for a healthy weight, 7–11.5 kg if overweight, and 5–9 kg with obesity (IOM guidelines).</p>
+    <p><b>How much gain is expected in the first trimester?</b><br>About 0.5–2 kg in total across the first trimester; the steadier weekly rate applies from the second trimester onward.</p>
+    <p style="margin-bottom:0"><b>What if I am carrying twins?</b><br>The IOM twin guidelines are 16.8–24.5 kg (healthy weight), 14.1–22.7 kg (overweight) and 11.3–19.1 kg (obesity). No guideline was set for twins when underweight.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+// IOM 2009 guidelines: total gain range and weekly rate (2nd/3rd trimester), kg
+const GUIDE = {
+  under:  { label: "Underweight",    total: [12.5, 18],   rate: [0.44, 0.58], twin: null },
+  normal: { label: "Healthy weight", total: [11.5, 16],   rate: [0.35, 0.50], twin: [16.8, 24.5] },
+  over:   { label: "Overweight",     total: [7, 11.5],    rate: [0.23, 0.33], twin: [14.1, 22.7] },
+  obese:  { label: "Obesity",        total: [5, 9],       rate: [0.17, 0.27], twin: [11.3, 19.1] }
+};
+function catOf(bmi){ if(bmi < 18.5) return "under"; if(bmi < 25) return "normal"; if(bmi < 30) return "over"; return "obese"; }
+function expectedRange(g, week){
+  // First trimester (weeks 1-13): 0.5-2 kg total, prorated. After week 13: weekly rate.
+  if(week <= 13) return [0.5 * week / 13, 2 * week / 13];
+  return [0.5 + g.rate[0] * (week - 13), 2 + g.rate[1] * (week - 13)];
+}
+const kg = n => n.toFixed(1) + " kg";
+function calc(){
+  const h = num(hEl.value) / 100, pre = num(preEl.value), week = Math.min(42, Math.max(1, num(weekEl.value))), cur = num(curEl.value);
+  if(h <= 0 || pre <= 0) return;
+  const bmi = pre / (h * h);
+  const key = catOf(bmi), g = GUIDE[key];
+  const twin = typeEl.value === "twin";
+  bmiOutEl.textContent = bmi.toFixed(1);
+  bmiCatEl.textContent = g.label;
+  weekEchoEl.textContent = week;
+  document.querySelectorAll("#guideTable tr[data-cat]").forEach(tr => tr.classList.toggle("hl", tr.dataset.cat === key));
+  if(twin && g.twin){
+    totalGainEl.textContent = kg(g.twin[0]) + " – " + kg(g.twin[1]);
+    catLineEl.textContent = "Recommended total gain (twins)";
+    rateOutEl.textContent = "See total range (no weekly rate set)";
+    const exp = expectedRange(g, week);
+    expectedOutEl.textContent = "about " + kg(exp[0]) + " – " + kg(exp[1]) + " (singleton pace, rough guide)";
+  } else if(twin){
+    totalGainEl.textContent = "No IOM guideline";
+    catLineEl.textContent = "No twin guideline for underweight (insufficient data)";
+    rateOutEl.textContent = g.rate[0].toFixed(2) + " – " + g.rate[1].toFixed(2) + " kg/week (singleton)";
+    expectedOutEl.textContent = "-";
+  } else {
+    totalGainEl.textContent = kg(g.total[0]) + " – " + kg(g.total[1]);
+    catLineEl.textContent = "Recommended total gain";
+    rateOutEl.textContent = g.rate[0].toFixed(2) + " – " + g.rate[1].toFixed(2) + " kg/week";
+    const exp = expectedRange(g, week);
+    expectedOutEl.textContent = "about " + kg(exp[0]) + " – " + kg(exp[1]);
+  }
+  if(cur > 0){
+    const gain = cur - pre, exp = expectedRange(g, week);
+    gainOutEl.textContent = kg(gain);
+    verdictOutEl.textContent = gain < exp[0] ? "Below the expected range" : (gain > exp[1] ? "Above the expected range" : "Within the expected range");
+  } else {
+    gainOutEl.textContent = "-";
+    verdictOutEl.textContent = "-";
+  }
+}
+const hEl = document.getElementById("height"), preEl = document.getElementById("pre"), weekEl = document.getElementById("week"),
+      curEl = document.getElementById("cur"), typeEl = document.getElementById("type");
+const totalGainEl = document.getElementById("totalGain"), catLineEl = document.getElementById("catLine"),
+      bmiOutEl = document.getElementById("bmiOut"), bmiCatEl = document.getElementById("bmiCat"),
+      rateOutEl = document.getElementById("rateOut"), expectedOutEl = document.getElementById("expectedOut"),
+      gainOutEl = document.getElementById("gainOut"), verdictOutEl = document.getElementById("verdictOut"),
+      weekEchoEl = document.getElementById("weekEcho");
+[hEl, preEl, weekEl, curEl, typeEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

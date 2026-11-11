@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Body Type Calculator — Somatotype Estimator (Endomorph, Mesomorph, Ectomorph)</title>
+<meta name="description" content="A rough estimate of your somatotype — endomorph, mesomorph and ectomorph scores — from your height, weight, wrist and waist measurements. Clearly approximate; not the formal Heath-Carter rating.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Body Type (Somatotype) Estimator",
+  "url": "https://ikesita.github.io/health-calculators/somatotype.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Estimate your somatotype tendencies (endomorphy, mesomorphy, ectomorphy) from height, weight, wrist and waist measurements. A simplified approximation inspired by the Heath-Carter system.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What are the three somatotypes?", "acceptedAnswer": { "@type": "Answer", "text": "In the Heath-Carter system everyone is rated on three scales: endomorphy (relative roundness/fatness), mesomorphy (relative muscularity and skeletal robustness) and ectomorphy (relative linearity/slenderness). Most people are a blend, not a pure type." } },
+    { "@type": "Question", "name": "How accurate is this somatotype estimate?", "acceptedAnswer": { "@type": "Answer", "text": "It is a rough approximation only. The formal Heath-Carter anthropometric rating uses ten measurements including skinfolds, bone breadths at the elbow and knee, and arm and calf girths, taken by a trained measurer. This page uses just four measurements, so treat the result as a tendency, not a rating." } },
+    { "@type": "Question", "name": "Can your somatotype change?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, partly. Your skeletal frame is fixed, but body fat and muscle mass change with training and diet, so the endomorphy and mesomorphy components of a rating can shift over time." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#7c3aed; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:28px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:17px;color:var(--acc)}
+  .bar{height:14px;background:#eceef4;border-radius:7px;overflow:hidden;margin:4px 0 12px}
+  .bar span{display:block;height:100%;background:var(--acc);border-radius:7px}
+  .bname{font-size:14px;font-weight:700}
+  .bval{float:right;font-weight:800}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Body Type (Somatotype) Estimator</h1>
+    <p>A rough estimate of your endomorph, mesomorph and ectomorph tendencies from four simple measurements.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Height (cm)</label><input id="height" type="number" min="120" max="230" step="0.1" value="180"></div>
+      <div class="f"><label>Weight (kg)</label><input id="weight" type="number" min="30" max="300" step="0.1" value="75"></div>
+      <div class="f"><label>Wrist circumference (cm)</label><input id="wrist" type="number" min="10" max="30" step="0.1" value="17"></div>
+      <div class="f"><label>Waist circumference (cm)</label><input id="waist" type="number" min="40" max="200" step="0.1" value="80"></div>
+    </div>
+    <div class="big" id="rating">-</div>
+    <div class="cat" id="dominant">-</div>
+  </div>
+
+  <div class="card">
+    <div class="bname">Endomorphy — roundness <span class="bval" id="endoVal">-</span></div>
+    <div class="bar"><span id="endoBar" style="width:0%"></span></div>
+    <div class="bname">Mesomorphy — muscularity / frame <span class="bval" id="mesoVal">-</span></div>
+    <div class="bar"><span id="mesoBar" style="width:0%"></span></div>
+    <div class="bname">Ectomorphy — linearity <span class="bval" id="ectoVal">-</span></div>
+    <div class="bar"><span id="ectoBar" style="width:0%"></span></div>
+    <p class="note" style="margin-top:6px"><b>How to read this:</b> scores run roughly 1–7+. A component 2+ points above the others is dominant; scores within about 1 point of each other mean a balanced blend. <b>Important:</b> this is a simplified estimate, <i>not</i> the formal Heath-Carter rating, which requires skinfold thicknesses, elbow and knee breadths, and arm and calf girths measured by a trained anthropometrist. Ectomorphy here uses the published Heath-Carter height–weight ratio equation; endomorphy and mesomorphy use simple estimates from waist-to-height ratio and wrist size relative to height — reasonable tendencies, not measurements.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>What are the three somatotypes?</b><br>Endomorphy (roundness), mesomorphy (muscularity/frame) and ectomorphy (linearity). Everyone has all three in some proportion.</p>
+    <p><b>How accurate is this estimate?</b><br>Rough only. The formal Heath-Carter method uses ten measurements including skinfolds and bone breadths. Use this page for a general tendency.</p>
+    <p style="margin-bottom:0"><b>Can your somatotype change?</b><br>Your frame is fixed, but fat and muscle are not — training and diet can shift the endomorphy and mesomorphy components over time.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere.</footer>
+</div>
+
+<script>
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+function ectomorphy(hwr){
+  // Published Heath-Carter height-weight ratio equation (Carter & Heath, 1990)
+  if(hwr >= 40.75) return 0.732 * hwr - 28.58;
+  if(hwr > 38.25) return 0.463 * hwr - 17.63;
+  return 0.1;
+}
+function somatotype(hCm, wKg, wristCm, waistCm){
+  const hwr = hCm / Math.cbrt(wKg);
+  const ecto = clamp(ectomorphy(hwr), 0.5, 9);
+  const endo = clamp(20 * (waistCm / hCm) - 6, 0.5, 9);      // simple estimate from waist-to-height ratio
+  const meso = clamp(200 * (wristCm / hCm) - 15, 0.5, 9);    // simple estimate from frame (wrist relative to height)
+  return { endo, meso, ecto };
+}
+function dominantName(s){
+  const parts = [["Endomorph", s.endo], ["Mesomorph", s.meso], ["Ectomorph", s.ecto]].sort((a, b) => b[1] - a[1]);
+  if(parts[0][1] - parts[1][1] < 1) return "Balanced " + parts[0][0].toLowerCase() + "–" + parts[1][0].toLowerCase() + " blend";
+  return parts[0][0] + "-dominant";
+}
+function calc(){
+  const h = num(hEl.value), w = num(wEl.value), wrist = num(wristEl.value), waist = num(waistEl.value);
+  if(h <= 0 || w <= 0 || wrist <= 0 || waist <= 0) return;
+  const s = somatotype(h, w, wrist, waist);
+  ratingEl.textContent = s.endo.toFixed(1) + " – " + s.meso.toFixed(1) + " – " + s.ecto.toFixed(1);
+  dominantEl.textContent = dominantName(s) + " tendency";
+  endoValEl.textContent = s.endo.toFixed(1); mesoValEl.textContent = s.meso.toFixed(1); ectoValEl.textContent = s.ecto.toFixed(1);
+  endoBarEl.style.width = (s.endo / 9 * 100) + "%";
+  mesoBarEl.style.width = (s.meso / 9 * 100) + "%";
+  ectoBarEl.style.width = (s.ecto / 9 * 100) + "%";
+}
+const hEl = document.getElementById("height"), wEl = document.getElementById("weight"),
+      wristEl = document.getElementById("wrist"), waistEl = document.getElementById("waist");
+const ratingEl = document.getElementById("rating"), dominantEl = document.getElementById("dominant");
+const endoValEl = document.getElementById("endoVal"), mesoValEl = document.getElementById("mesoVal"), ectoValEl = document.getElementById("ectoVal");
+const endoBarEl = document.getElementById("endoBar"), mesoBarEl = document.getElementById("mesoBar"), ectoBarEl = document.getElementById("ectoBar");
+[hEl, wEl, wristEl, waistEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>
