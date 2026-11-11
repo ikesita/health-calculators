@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMR Calculator — Mifflin-St Jeor, Harris-Benedict & Katch-McArdle</title>
+<meta name="description" content="Calculate your basal metabolic rate (BMR) with the Mifflin-St Jeor and revised Harris-Benedict equations, plus Katch-McArdle if you know your body fat percentage.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "BMR Calculator",
+  "url": "https://ikesita.github.io/health-calculators/bmr.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Estimate basal metabolic rate (kcal/day at complete rest) with the Mifflin-St Jeor equation, the revised Harris-Benedict equation (Roza & Shizgal 1984), and the Katch-McArdle formula when body fat percentage is known.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is BMR?", "acceptedAnswer": { "@type": "Answer", "text": "Basal metabolic rate is the energy your body burns at complete rest to run essential functions — breathing, circulation, temperature and cell maintenance. For most people it is 60–75% of total daily energy expenditure." } },
+    { "@type": "Question", "name": "Which BMR formula is most accurate?", "acceptedAnswer": { "@type": "Answer", "text": "Validation studies generally find the Mifflin-St Jeor equation (1990) the most accurate of the weight-and-height formulas for general adults. Katch-McArdle can be better for lean, muscular people because it uses fat-free mass, but it depends on an accurate body fat measurement." } },
+    { "@type": "Question", "name": "What is the difference between BMR and TDEE?", "acceptedAnswer": { "@type": "Answer", "text": "BMR is rest-only energy. TDEE (total daily energy expenditure) multiplies BMR by an activity factor to include movement, work and exercise. Use our TDEE Calculator when you want maintenance calories rather than the resting floor." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#0e7490; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:17px;color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>BMR Calculator — Basal Metabolic Rate</h1>
+    <p>The calories your body burns at complete rest, before any activity. Three established equations side by side, so you can see the spread.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Sex</label><select id="sex"><option value="m">Male</option><option value="f">Female</option></select></div>
+      <div class="f"><label>Age (years)</label><input id="age" type="number" min="10" max="110" step="1" value="30"></div>
+      <div class="f"><label>Weight (kg)</label><input id="wt" type="number" min="25" max="400" step="0.1" value="80"></div>
+      <div class="f"><label>Height (cm)</label><input id="ht" type="number" min="100" max="250" step="0.5" value="180"></div>
+      <div class="f"><label>Body fat % (optional, for Katch-McArdle)</label><input id="bf" type="number" min="2" max="70" step="0.1" placeholder="optional"></div>
+    </div>
+    <div class="big" id="bmrOut">-</div>
+    <div class="cat" id="bmrSub">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Mifflin-St Jeor (1990) — usually the most accurate</td><td class="v" id="rMifflin">-</td></tr>
+      <tr><td>Harris-Benedict, revised (Roza &amp; Shizgal 1984)</td><td class="v" id="rHB">-</td></tr>
+      <tr><td>Katch-McArdle (needs body fat %)</td><td class="v" id="rKatch">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Equations (W = kg, H = cm, A = years) — Mifflin-St Jeor: men 10W + 6.25H − 5A + 5; women 10W + 6.25H − 5A − 161. Harris-Benedict revised: men 88.362 + 13.397W + 4.799H − 5.677A; women 447.593 + 9.247W + 3.098H − 4.330A. Katch-McArdle: 370 + 21.6 × fat-free mass (kg), the same for both sexes. Even the best equation is typically within about ±10% of a measured BMR; muscle mass, thyroid status, illness and some medications shift the real value. BMR is a floor, not a calorie target — eating below it long-term is not recommended without medical supervision.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>BMR or TDEE — which should I use?</b><br>Use BMR to understand your resting floor. Use TDEE (BMR × activity level) for maintenance calories and for setting weight-loss or weight-gain targets — our TDEE Calculator does that step.</p>
+    <p><b>Why does Katch-McArdle need body fat?</b><br>Because it is built on fat-free mass: two people of the same weight burn differently at rest if one carries much more muscle. If your body fat estimate is rough, Mifflin-St Jeor is the safer default.</p>
+    <p style="margin-bottom:0"><b>Does BMR change with age?</b><br>Yes — mostly because fat-free mass tends to fall with age. The equations capture this only crudely through the age term. This page gives general estimates only and is not medical advice.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere. This calculator provides general information only and is not medical advice.</footer>
+</div>
+
+<script>
+function bmrMifflin(sex, w, h, a){ return sex === "m" ? 10*w + 6.25*h - 5*a + 5 : 10*w + 6.25*h - 5*a - 161; }
+function bmrHB(sex, w, h, a){ return sex === "m" ? 88.362 + 13.397*w + 4.799*h - 5.677*a : 447.593 + 9.247*w + 3.098*h - 4.330*a; }
+function bmrKatch(w, bfPct){ return 370 + 21.6 * w * (1 - bfPct / 100); }
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+function calc(){
+  const sex = sexEl.value, a = num(ageEl.value), w = num(wtEl.value), h = num(htEl.value), bf = num(bfEl.value);
+  if(a <= 0 || w <= 0 || h <= 0) return;
+  const m = bmrMifflin(sex, w, h, a), hb = bmrHB(sex, w, h, a);
+  bmrOutEl.textContent = Math.round(m).toLocaleString("en-US") + " kcal/day";
+  bmrSubEl.textContent = "BMR by Mifflin-St Jeor — energy at complete rest";
+  rMifflinEl.textContent = Math.round(m).toLocaleString("en-US") + " kcal/day";
+  rHBEl.textContent = Math.round(hb).toLocaleString("en-US") + " kcal/day";
+  rKatchEl.textContent = (bf > 0 && bf < 100) ? Math.round(bmrKatch(w, bf)).toLocaleString("en-US") + " kcal/day" : "enter body fat %";
+}
+const sexEl = document.getElementById("sex"), ageEl = document.getElementById("age"),
+      wtEl = document.getElementById("wt"), htEl = document.getElementById("ht"), bfEl = document.getElementById("bf");
+const bmrOutEl = document.getElementById("bmrOut"), bmrSubEl = document.getElementById("bmrSub");
+const rMifflinEl = document.getElementById("rMifflin"), rHBEl = document.getElementById("rHB"), rKatchEl = document.getElementById("rKatch");
+[sexEl, ageEl, wtEl, htEl, bfEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

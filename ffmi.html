@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FFMI Calculator — Fat-Free Mass Index (Adjusted FFMI)</title>
+<meta name="description" content="Calculate your Fat-Free Mass Index (FFMI) and height-adjusted FFMI from weight, body fat percentage and height, with the Kouri et al. reference ranges.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "FFMI Calculator (Fat-Free Mass Index)",
+  "url": "https://ikesita.github.io/health-calculators/ffmi.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Calculate fat-free mass index (FFMI = fat-free mass / height²) and the height-adjusted FFMI from body weight, body fat percentage and height.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is FFMI?", "acceptedAnswer": { "@type": "Answer", "text": "The fat-free mass index is like a BMI for muscle: your fat-free mass in kilograms divided by your height in metres squared. Unlike BMI, it does not penalise muscular people, because fat mass is removed first." } },
+    { "@type": "Question", "name": "What is a good FFMI?", "acceptedAnswer": { "@type": "Answer", "text": "For men, roughly 18–20 is average, 20–22 above average and 22–24 excellent. In the Kouri et al. (1995) study, no non-steroid-using man exceeded an adjusted FFMI of about 25, while steroid users averaged about 27. For women the corresponding ceiling reported is about 22." } },
+    { "@type": "Question", "name": "Why is there an adjusted FFMI?", "acceptedAnswer": { "@type": "Answer", "text": "Raw FFMI slightly favours taller people. The adjusted (normalised) FFMI corrects your score to a standard height of 1.80 m: adjusted FFMI = FFMI + 6.1 × (1.8 − height in metres), which makes scores comparable across heights." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#0e7490; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:17px;color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  tr.hl td{color:var(--acc);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>FFMI Calculator — Fat-Free Mass Index</h1>
+    <p>BMI for muscle: how much fat-free mass you carry for your height. Enter a body fat percentage from a DEXA scan, smart scale or another calculator.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Sex</label><select id="sex"><option value="m">Male</option><option value="f">Female</option></select></div>
+      <div class="f"><label>Weight (kg)</label><input id="wt" type="number" min="25" max="400" step="0.1" value="80"></div>
+      <div class="f"><label>Body fat (%)</label><input id="bf" type="number" min="2" max="70" step="0.1" value="15"></div>
+      <div class="f"><label>Height (cm)</label><input id="ht" type="number" min="100" max="250" step="0.5" value="180"></div>
+    </div>
+    <div class="big" id="ffmiOut">-</div>
+    <div class="cat" id="ffmiCat">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Fat-free mass</td><td class="v" id="rFfm">-</td></tr>
+      <tr><td>Fat mass</td><td class="v" id="rFat">-</td></tr>
+      <tr><td>FFMI (raw)</td><td class="v" id="rRaw">-</td></tr>
+      <tr><td>Adjusted FFMI (normalised to 1.80 m)</td><td class="v" id="rAdj">-</td></tr>
+    </table>
+    <table id="scaleTable" style="margin-top:14px">
+      <tr><td colspan="2" style="color:var(--ink);font-weight:800" id="scaleTitle">Adjusted FFMI — reference ranges (men)</td></tr>
+      <tr data-lo="0" data-hi="18"><td>Below 18</td><td class="v">Below average</td></tr>
+      <tr data-lo="18" data-hi="20"><td>18 – 20</td><td class="v">Average</td></tr>
+      <tr data-lo="20" data-hi="22"><td>20 – 22</td><td class="v">Above average</td></tr>
+      <tr data-lo="22" data-hi="24"><td>22 – 24</td><td class="v">Excellent</td></tr>
+      <tr data-lo="24" data-hi="26"><td>24 – 26</td><td class="v">Superior — near the reported natural ceiling*</td></tr>
+      <tr data-lo="26" data-hi="999"><td>Over 26</td><td class="v">Above the reported natural range*</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">FFMI = fat-free mass (kg) ÷ height (m)². Adjusted FFMI = FFMI + 6.1 × (1.8 − height in m), after Kouri et al. (<i>Clinical Journal of Sport Medicine</i> 1995;5:223–228). *In that study of 157 male athletes, no non-user of anabolic steroids exceeded ~25, and the authors suggested ~25–26 as a practical natural ceiling for men; for women the corresponding reported ceiling is about 22, so treat scores above that with the same caution. The result is only as accurate as your body fat input — a ±3% body fat error moves FFMI by roughly ±0.7.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>How is FFMI different from BMI?</b><br>BMI uses total weight, so a muscular person can be classed "overweight". FFMI first removes fat mass, so it tracks muscularity rather than size.</p>
+    <p><b>What body fat number should I enter?</b><br>The most accurate you have: DEXA first, then a careful tape-measure or skinfold estimate, then a smart scale. Our Body Fat Calculator gives a Navy-method estimate if you need one.</p>
+    <p style="margin-bottom:0"><b>Is a higher FFMI always better?</b><br>Not necessarily. FFMI says nothing about health markers, strength or how the mass was gained, and chasing the ceiling is not a health goal. This page is general information, not medical advice.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere. This calculator provides general information only and is not medical advice.</footer>
+</div>
+
+<script>
+function ffmiCalc(w, bfPct, hCm){
+  const ffm = w * (1 - bfPct / 100);
+  const hm = hCm / 100;
+  const raw = ffm / (hm * hm);
+  const adj = raw + 6.1 * (1.8 - hm);
+  return { ffm, fat: w - ffm, raw, adj };
+}
+function ffmiBand(adj, sex){
+  if(sex === "f"){
+    if(adj < 15) return "Below average for women";
+    if(adj < 17) return "Average for women";
+    if(adj < 19) return "Above average for women";
+    if(adj < 21) return "Excellent for women";
+    if(adj < 22) return "Superior — near the reported natural ceiling for women";
+    return "Above the reported natural range for women";
+  }
+  if(adj < 18) return "Below average";
+  if(adj < 20) return "Average";
+  if(adj < 22) return "Above average";
+  if(adj < 24) return "Excellent";
+  if(adj < 26) return "Superior — near the reported natural ceiling";
+  return "Above the reported natural range";
+}
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const f1 = x => (Math.round(x * 10) / 10).toFixed(1);
+const f2 = x => (Math.round(x * 100) / 100).toFixed(2);
+function calc(){
+  const w = num(wtEl.value), bf = num(bfEl.value), h = num(htEl.value), sex = sexEl.value;
+  if(w <= 0 || h <= 0 || bf <= 0 || bf >= 100) return;
+  const r = ffmiCalc(w, bf, h);
+  ffmiOutEl.textContent = f2(r.adj);
+  ffmiCatEl.textContent = "adjusted FFMI — " + ffmiBand(r.adj, sex);
+  rFfmEl.textContent = f1(r.ffm) + " kg";
+  rFatEl.textContent = f1(r.fat) + " kg";
+  rRawEl.textContent = f2(r.raw);
+  rAdjEl.textContent = f2(r.adj);
+  scaleTitleEl.textContent = sex === "f" ? "Adjusted FFMI — rough guide (women; bands are approximate)" : "Adjusted FFMI — reference ranges (men)";
+  document.querySelectorAll("#scaleTable tr[data-lo]").forEach(tr => {
+    const lo = parseFloat(tr.dataset.lo), hi = parseFloat(tr.dataset.hi);
+    tr.classList.toggle("hl", sex === "m" && r.adj >= lo && r.adj < hi);
+  });
+}
+const sexEl = document.getElementById("sex"), wtEl = document.getElementById("wt"), bfEl = document.getElementById("bf"), htEl = document.getElementById("ht");
+const ffmiOutEl = document.getElementById("ffmiOut"), ffmiCatEl = document.getElementById("ffmiCat");
+const rFfmEl = document.getElementById("rFfm"), rFatEl = document.getElementById("rFat"), rRawEl = document.getElementById("rRaw"), rAdjEl = document.getElementById("rAdj");
+const scaleTitleEl = document.getElementById("scaleTitle");
+[sexEl, wtEl, bfEl, htEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

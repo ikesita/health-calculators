@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lean Body Mass Calculator — Boer, James & Hume Formulas</title>
+<meta name="description" content="Estimate your lean body mass (fat-free mass) from weight and height with the Boer, James and Hume formulas, plus your fat mass and lean percentage.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Lean Body Mass Calculator",
+  "url": "https://ikesita.github.io/health-calculators/leanmass.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Estimate lean body mass from sex, weight and height using the Boer (1984), James (1976) and Hume (1966) formulas, and show fat mass as the remainder.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is lean body mass?", "acceptedAnswer": { "@type": "Answer", "text": "Lean body mass is everything in your body that is not fat: muscle, bone, organs, skin and water. It is slightly higher than fat-free mass because it includes a small amount of essential fat in membranes and organs." } },
+    { "@type": "Question", "name": "Which lean body mass formula is best?", "acceptedAnswer": { "@type": "Answer", "text": "The Boer formula (1984) is the most widely used for adults and is generally preferred. All three formulas here are estimates from height and weight only; a DEXA scan or a good body-composition measurement is more accurate." } },
+    { "@type": "Question", "name": "Why do the three formulas give different numbers?", "acceptedAnswer": { "@type": "Answer", "text": "They were fitted to different study populations in different decades, and they diverge most at very high or very low body weights. Treat the spread between them as the size of the estimation error." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#0e7490; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:17px;color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Lean Body Mass Calculator</h1>
+    <p>Estimate how much of your weight is lean tissue — muscle, bone, organs and water — using three established height-and-weight formulas.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Sex</label><select id="sex"><option value="m">Male</option><option value="f">Female</option></select></div>
+      <div class="f"><label>Weight (kg)</label><input id="wt" type="number" min="25" max="400" step="0.1" value="80"></div>
+      <div class="f"><label>Height (cm)</label><input id="ht" type="number" min="100" max="250" step="0.5" value="180"></div>
+    </div>
+    <div class="big" id="lbmOut">-</div>
+    <div class="cat" id="lbmSub">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Boer (1984) — most commonly used</td><td class="v" id="rBoer">-</td></tr>
+      <tr><td>James (1976)</td><td class="v" id="rJames">-</td></tr>
+      <tr><td>Hume (1966)</td><td class="v" id="rHume">-</td></tr>
+      <tr><td>Estimated fat mass (weight − Boer LBM)</td><td class="v" id="rFat">-</td></tr>
+      <tr><td>Implied body fat (from Boer)</td><td class="v" id="rFatPct">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Formulas (W = weight in kg, H = height in cm) — Boer: men 0.407W + 0.267H − 19.2, women 0.252W + 0.473H − 48.3. James: men 1.1W − 128(W/H)², women 1.07W − 148(W/H)². Hume: men 0.32810W + 0.33929H − 29.5336, women 0.29569W + 0.41813H − 43.2933. These are population estimates that use no body-composition input, so they can be off by several kilograms for very muscular or very heavy individuals — the implied body fat figure is only as good as the LBM estimate.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>Lean body mass vs fat-free mass — what's the difference?</b><br>Fat-free mass excludes all fat. Lean body mass includes a small amount of essential fat (in cell membranes, bone marrow and the central nervous system), so it is slightly higher. In everyday use the two terms are often swapped.</p>
+    <p><b>Why track lean body mass?</b><br>When losing weight, the goal is usually to lose fat while keeping lean mass. When gaining, a rising LBM with stable waist size suggests muscle gain rather than fat gain.</p>
+    <p style="margin-bottom:0"><b>How accurate is this?</b><br>Height-and-weight formulas typically land within a few kilograms of DEXA for average builds, and worse at the extremes. This page gives general estimates only and is not medical advice.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere. This calculator provides general information only and is not medical advice.</footer>
+</div>
+
+<script>
+function lbmBoer(sex, w, h){ return sex === "m" ? 0.407*w + 0.267*h - 19.2 : 0.252*w + 0.473*h - 48.3; }
+function lbmJames(sex, w, h){ const r = w / h; return sex === "m" ? 1.1*w - 128*r*r : 1.07*w - 148*r*r; }
+function lbmHume(sex, w, h){ return sex === "m" ? 0.32810*w + 0.33929*h - 29.5336 : 0.29569*w + 0.41813*h - 43.2933; }
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const f1 = x => (Math.round(x * 10) / 10).toFixed(1);
+function calc(){
+  const w = num(wtEl.value), h = num(htEl.value), sex = sexEl.value;
+  if(w <= 0 || h <= 0) return;
+  const b = lbmBoer(sex, w, h), j = lbmJames(sex, w, h), hu = lbmHume(sex, w, h);
+  lbmOutEl.textContent = f1(b) + " kg";
+  lbmSubEl.textContent = "lean body mass (Boer) — " + f1(b / w * 100) + "% of your weight";
+  rBoerEl.textContent = f1(b) + " kg";
+  rJamesEl.textContent = f1(j) + " kg";
+  rHumeEl.textContent = f1(hu) + " kg";
+  rFatEl.textContent = f1(w - b) + " kg";
+  rFatPctEl.textContent = f1((w - b) / w * 100) + "%";
+}
+const sexEl = document.getElementById("sex"), wtEl = document.getElementById("wt"), htEl = document.getElementById("ht");
+const lbmOutEl = document.getElementById("lbmOut"), lbmSubEl = document.getElementById("lbmSub");
+const rBoerEl = document.getElementById("rBoer"), rJamesEl = document.getElementById("rJames"), rHumeEl = document.getElementById("rHume"),
+      rFatEl = document.getElementById("rFat"), rFatPctEl = document.getElementById("rFatPct");
+[sexEl, wtEl, htEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

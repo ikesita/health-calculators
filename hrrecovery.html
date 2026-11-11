@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Heart Rate Recovery Calculator — 1-Minute HRR After Exercise</title>
+<meta name="description" content="Calculate your heart rate recovery (HRR): how much your heart rate drops in the first 1–2 minutes after exercise, with the commonly used 12 bpm reference threshold.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Heart Rate Recovery Calculator",
+  "url": "https://ikesita.github.io/health-calculators/hrrecovery.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Calculate heart rate recovery (HRR) from peak exercise heart rate and heart rate 1 and 2 minutes after stopping, with general interpretation bands and the 12 bpm threshold from Cole et al. (NEJM 1999).",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is heart rate recovery (HRR)?", "acceptedAnswer": { "@type": "Answer", "text": "Heart rate recovery is how many beats per minute your heart rate falls during the first minute or two after you stop exercising. A faster drop generally reflects better cardiovascular fitness and healthy autonomic (vagus nerve) function." } },
+    { "@type": "Question", "name": "What is a good heart rate recovery?", "acceptedAnswer": { "@type": "Answer", "text": "In a widely cited study (Cole et al., New England Journal of Medicine, 1999), a drop of 12 bpm or less in the first minute after exercise was considered abnormal and was associated with higher risk. Trained endurance athletes often recover 30–50 bpm in the first minute." } },
+    { "@type": "Question", "name": "How should I measure it?", "acceptedAnswer": { "@type": "Answer", "text": "Record your heart rate at the moment you finish a hard effort, then again exactly 1 minute (and optionally 2 minutes) after stopping while you cool down. Use the same protocol each time so your results are comparable." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#0e7490; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:17px;color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  tr.hl td{color:var(--acc);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Heart Rate Recovery Calculator</h1>
+    <p>How fast your heart rate falls after exercise is a useful fitness signal. Enter your heart rate at the end of a hard effort and again after 1 minute of cooling down.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Peak heart rate at end of exercise (bpm)</label><input id="peak" type="number" min="60" max="230" step="1" value="170"></div>
+      <div class="f"><label>Heart rate after 1 minute (bpm)</label><input id="hr1" type="number" min="40" max="230" step="1" value="138"></div>
+      <div class="f"><label>Heart rate after 2 minutes (bpm, optional)</label><input id="hr2" type="number" min="0" max="230" step="1" placeholder="optional"></div>
+    </div>
+    <div class="big" id="hrrOut">-</div>
+    <div class="cat" id="hrrCat">-</div>
+  </div>
+
+  <div class="card">
+    <table id="hrrTable">
+      <tr><td colspan="2" style="color:var(--ink);font-weight:800">1-minute heart rate recovery — general bands</td></tr>
+      <tr data-band="low"><td>12 bpm or less</td><td class="v">Below the clinical reference threshold*</td></tr>
+      <tr data-band="typical"><td>13–25 bpm</td><td class="v">Typical range for healthy adults</td></tr>
+      <tr data-band="good"><td>26–40 bpm</td><td class="v">Good — typical of regularly active people</td></tr>
+      <tr data-band="excellent"><td>Over 40 bpm</td><td class="v">Excellent — typical of trained endurance athletes</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">*In Cole et al. (<i>New England Journal of Medicine</i> 1999;341:1351–1357), a 1-minute recovery of 12 bpm or less after symptom-limited exercise was classed as abnormal and predicted higher mortality risk in that study population. <span id="hrr2note"></span> These bands are general information for healthy adults, not a diagnosis. Readings are affected by how hard the effort was, whether you cool down walking or stop dead, caffeine, heat, illness and medication such as beta blockers.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>How do I measure heart rate recovery?</b><br>Note your heart rate the moment you finish exercising, then again exactly 1 minute later while walking slowly or standing. The difference is your 1-minute HRR. A chest-strap monitor gives the cleanest readings.</p>
+    <p><b>Can I improve my HRR?</b><br>Generally yes — regular aerobic training tends to speed up recovery over weeks to months. Track the trend with the same workout and protocol rather than chasing single readings.</p>
+    <p style="margin-bottom:0"><b>Should I worry about a low HRR?</b><br>A single low reading is common after an unusually hard effort or in the heat. If your recovery is repeatedly 12 bpm or less, or you have chest pain, breathlessness or dizziness during exercise, discuss it with a doctor. This page is general information, not medical advice.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere. This calculator provides general information only and is not medical advice.</footer>
+</div>
+
+<script>
+function hrrBand(hrr1){
+  if(hrr1 <= 12) return ["low", "Below the 12 bpm reference threshold"];
+  if(hrr1 <= 25) return ["typical", "Typical range for healthy adults"];
+  if(hrr1 <= 40) return ["good", "Good recovery"];
+  return ["excellent", "Excellent recovery"];
+}
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+function calc(){
+  const peak = num(peakEl.value), hr1 = num(hr1El.value), hr2 = num(hr2El.value);
+  if(peak <= 0 || hr1 <= 0 || hr1 > peak) { hrrOutEl.textContent = "-"; hrrCatEl.textContent = "Enter a 1-minute heart rate below your peak."; return; }
+  const hrr1 = peak - hr1;
+  const band = hrrBand(hrr1);
+  hrrOutEl.textContent = "HRR " + hrr1 + " bpm";
+  hrrCatEl.textContent = band[1];
+  document.querySelectorAll("#hrrTable tr[data-band]").forEach(tr => tr.classList.toggle("hl", tr.dataset.band === band[0]));
+  hrr2noteEl.textContent = hr2 > 0 && hr2 <= hr1 ? "Your 2-minute drop is " + (peak - hr2) + " bpm in total." : "";
+}
+const peakEl = document.getElementById("peak"), hr1El = document.getElementById("hr1"), hr2El = document.getElementById("hr2");
+const hrrOutEl = document.getElementById("hrrOut"), hrrCatEl = document.getElementById("hrrCat"), hrr2noteEl = document.getElementById("hrr2note");
+[peakEl, hr1El, hr2El].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sweat Rate Calculator — Fluid Loss Per Hour of Exercise</title>
+<meta name="description" content="Calculate your sweat rate in litres per hour from before-and-after body weight, fluid intake and exercise duration, plus your percentage of body mass lost.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Sweat Rate Calculator",
+  "url": "https://ikesita.github.io/health-calculators/sweatrate.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Estimate sweat rate (L/h) from the change in body weight across a workout plus fluid consumed and urine produced: sweat loss = weight lost + fluid in − urine out, divided by exercise hours.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How do I measure my sweat rate?", "acceptedAnswer": { "@type": "Answer", "text": "Weigh yourself (ideally nude or in dry minimal clothing) right before and right after a workout. Record everything you drink during the session and any urine. Sweat loss in litres ≈ weight lost in kg + fluid drunk − urine, and sweat rate is that divided by the hours exercised." } },
+    { "@type": "Question", "name": "How much should I drink during exercise?", "acceptedAnswer": { "@type": "Answer", "text": "A common sports-medicine guideline is to plan intake so you finish the session having lost no more than about 2% of your body mass, using your sweat rate to schedule drinking rather than guessing. Exact needs vary with heat, intensity and the individual." } },
+    { "@type": "Question", "name": "Can I drink too much water?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Drinking far beyond your sweat losses during long events can dilute blood sodium (exercise-associated hyponatraemia), which is dangerous. Avoid finishing a workout heavier than you started, and include sodium on long, hot sessions." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#0e7490; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:17px;color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Sweat Rate Calculator</h1>
+    <p>Weigh yourself before and after a workout to find how much fluid you actually lose per hour — the basis for a drinking plan that is measured, not guessed.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Body weight before (kg)</label><input id="pre" type="number" min="25" max="400" step="0.05" value="70"></div>
+      <div class="f"><label>Body weight after (kg)</label><input id="post" type="number" min="25" max="400" step="0.05" value="69.2"></div>
+      <div class="f"><label>Fluid drunk during exercise (litres)</label><input id="intake" type="number" min="0" step="0.05" value="0.5"></div>
+      <div class="f"><label>Urine during exercise (litres, optional)</label><input id="urine" type="number" min="0" step="0.05" value="0"></div>
+      <div class="f"><label>Exercise duration (minutes)</label><input id="dur" type="number" min="1" step="1" value="90"></div>
+    </div>
+    <div class="big" id="rateOut">-</div>
+    <div class="cat" id="rateSub">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Total sweat loss</td><td class="v" id="rLoss">-</td></tr>
+      <tr><td>Sweat rate</td><td class="v" id="rRate">-</td></tr>
+      <tr><td>Body mass change (before → after)</td><td class="v" id="rPct">-</td></tr>
+      <tr><td>Suggested intake to finish within ~2% loss*</td><td class="v" id="rPlan">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Method: sweat loss (L) = weight lost (kg) + fluid drunk (L) − urine (L), treating 1 kg of body mass as ~1 L of water. *The plan figure is simply your sweat rate minus the 2%-of-body-mass allowance spread over the session — a planning aid from common sports-medicine guidance (e.g. ACSM position stand on exercise and fluid replacement), not a prescription. Weigh in consistent conditions (dry, minimal clothing) for a meaningful result; food eaten during the session and respiratory water loss are not captured.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>What sweat rates are normal?</b><br>Anywhere from ~0.3 L/h in cool, easy conditions to 2 L/h or more in hot, hard exercise. The same person can double their rate between winter and summer — re-test across the season.</p>
+    <p><b>Why does 2% matter?</b><br>Body-mass losses beyond roughly 2% are where studies consistently find performance dropping and heat strain rising. Small losses are fine and normal.</p>
+    <p style="margin-bottom:0"><b>Should I replace all the salt too?</b><br>On sessions over ~1–2 hours, or if your sweat leaves white salt marks, include sodium (sports drink or salty food). Dizziness, confusion, vomiting or a racing pulse in the heat are warning signs — stop, cool down and seek medical help. This page is general information, not medical advice.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere. This calculator provides general information only and is not medical advice.</footer>
+</div>
+
+<script>
+function sweatCalc(pre, post, intake, urine, minutes){
+  const loss = (pre - post) + intake - urine;
+  const hours = minutes / 60;
+  const rate = loss / hours;
+  const pct = (pre - post) / pre * 100;
+  const allowance = 0.02 * pre; // litres of loss tolerated within the ~2% guideline
+  const planPerHour = Math.max(0, (loss - allowance) / hours);
+  return { loss, rate, pct, planPerHour };
+}
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const f2 = x => (Math.round(x * 100) / 100).toFixed(2);
+function calc(){
+  const pre = num(preEl.value), post = num(postEl.value), intake = num(intakeEl.value), urine = num(urineEl.value), dur = num(durEl.value);
+  if(pre <= 0 || post <= 0 || dur <= 0) return;
+  const r = sweatCalc(pre, post, intake, urine, dur);
+  rateOutEl.textContent = f2(r.rate) + " L/h";
+  rateSubEl.textContent = "sweat rate — " + f2(r.loss) + " L lost in " + dur + " min";
+  rLossEl.textContent = f2(r.loss) + " L";
+  rRateEl.textContent = f2(r.rate) + " L/h";
+  rPctEl.textContent = (r.pct >= 0 ? "−" : "+") + f2(Math.abs(r.pct)) + "%";
+  rPlanEl.textContent = r.planPerHour > 0 ? "≈ " + f2(r.planPerHour) + " L/h while exercising" : "your usual intake already keeps you within ~2%";
+}
+const preEl = document.getElementById("pre"), postEl = document.getElementById("post"),
+      intakeEl = document.getElementById("intake"), urineEl = document.getElementById("urine"), durEl = document.getElementById("dur");
+const rateOutEl = document.getElementById("rateOut"), rateSubEl = document.getElementById("rateSub");
+const rLossEl = document.getElementById("rLoss"), rRateEl = document.getElementById("rRate"),
+      rPctEl = document.getElementById("rPct"), rPlanEl = document.getElementById("rPlan");
+[preEl, postEl, intakeEl, urineEl, durEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

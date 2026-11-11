@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conception Calculator — Estimate Conception Date & Fertile Window</title>
+<meta name="description" content="Estimate your conception date and fertile window from your due date or from the first day of your last period and cycle length. Reverse of the due date calculator.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Conception Calculator",
+  "url": "https://ikesita.github.io/health-calculators/conception.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Estimate the conception date and fertile window from an estimated due date (due date minus 266 days) or from the last menstrual period and cycle length.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "How is the conception date estimated from a due date?", "acceptedAnswer": { "@type": "Answer", "text": "A due date is usually set 280 days after the last menstrual period, and conception typically happens about 14 days after the period starts in a 28-day cycle. So the estimated conception date is the due date minus 266 days." } },
+    { "@type": "Question", "name": "What is the fertile window?", "acceptedAnswer": { "@type": "Answer", "text": "Sperm can survive in the reproductive tract for up to about 5 days and an egg for about 24 hours, so the fertile window is usually taken as the 5 days before ovulation (conception day) plus the day itself and the day after." } },
+    { "@type": "Question", "name": "How accurate is this estimate?", "acceptedAnswer": { "@type": "Answer", "text": "It is a rough estimate. Ovulation does not always fall on the textbook day, cycle lengths vary from month to month, and due dates themselves are estimates. An ultrasound-based dating from your healthcare provider is more reliable." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#db2777; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:26px;font-weight:900;text-align:center;margin:12px 0 2px}
+  .sub2{text-align:center;color:var(--sub);font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .warn{border-color:#f3c2d8;background:#fff5f9}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Conception Calculator</h1>
+    <p>Work backwards from your due date — or forwards from your last period — to estimate when conception happened and which days were your fertile window.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Calculate from</label><select id="mode"><option value="due">My due date</option><option value="lmp">My last period (LMP)</option></select></div>
+      <div class="f" id="dueWrap"><label>Estimated due date</label><input id="due" type="date"></div>
+      <div class="f" id="lmpWrap" style="display:none"><label>First day of last period (LMP)</label><input id="lmp" type="date"></div>
+      <div class="f" id="cycWrap" style="display:none"><label>Average cycle length (days)</label><input id="cycle" type="number" min="21" max="45" step="1" value="28"></div>
+    </div>
+    <div class="big" id="concOut">-</div>
+    <div class="sub2" id="winOut">-</div>
+  </div>
+
+  <div class="card">
+    <table>
+      <tr><td>Estimated conception (ovulation) date</td><td class="v" id="rConc">-</td></tr>
+      <tr><td>Fertile window</td><td class="v" id="rWin">-</td></tr>
+      <tr><td>Estimated last period (LMP)</td><td class="v" id="rLmp">-</td></tr>
+      <tr><td>Estimated due date</td><td class="v" id="rDue">-</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Method: a due date is conventionally LMP + 280 days, and ovulation/conception is conventionally LMP + (cycle length − 14) days — day 14 of a 28-day cycle. So from a due date, conception ≈ due date − 266 days (for a 28-day cycle). The fertile window is shown as the 5 days before conception through 1 day after, reflecting sperm survival of up to ~5 days and an egg lifespan of ~24 hours.</p>
+  </div>
+
+  <div class="card warn">
+    <p class="note" style="margin:0"><b>Important:</b> This is a rough estimate only. Real ovulation timing varies between people and between cycles, and sperm survival varies too, so the actual conception date can differ by several days. This tool is for general information and cannot establish dates for medical, legal or paternity purposes. Please rely on your healthcare provider's ultrasound dating for anything that matters.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>How is conception estimated from a due date?</b><br>Due date − 266 days. The 266 comes from the standard 280-day pregnancy length minus the ~14 days from the period's start to ovulation in a 28-day cycle.</p>
+    <p><b>Can conception happen on a day other than ovulation day?</b><br>Fertilisation happens within about a day of ovulation, but intercourse several days before ovulation can still lead to pregnancy because sperm survive up to ~5 days. That is why the window, not just one day, matters.</p>
+    <p style="margin-bottom:0"><b>My cycle is irregular. Can I still use this?</b><br>You can, but the estimate becomes much less reliable. With irregular cycles, ovulation may be far from the textbook day; ultrasound dating is the better source.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere. This calculator provides general information only and is not medical advice.</footer>
+</div>
+
+<script>
+const parseD = v => { const [y,m,d] = v.split("-").map(Number); return new Date(y, m - 1, d); };
+const fmtD = dt => dt.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+const addD = (dt, days) => { const t = new Date(dt); t.setDate(t.getDate() + days); return t; };
+function conceptionFromDue(due){ return addD(due, -266); }
+function lmpFromDue(due){ return addD(due, -280); }
+function conceptionFromLmp(lmp, cycle){ return addD(lmp, cycle - 14); }
+function dueFromLmp(lmp, cycle){ return addD(lmp, 280 + (cycle - 28)); }
+function calc(){
+  const mode = modeEl.value;
+  dueWrap.style.display = mode === "due" ? "" : "none";
+  lmpWrap.style.display = mode === "lmp" ? "" : "none";
+  cycWrap.style.display = mode === "lmp" ? "" : "none";
+  let conc, lmp, due;
+  if(mode === "due"){
+    if(!dueEl.value) return;
+    due = parseD(dueEl.value);
+    conc = conceptionFromDue(due);
+    lmp = lmpFromDue(due);
+  } else {
+    if(!lmpEl.value) return;
+    const cycle = Math.min(45, Math.max(21, parseInt(cycleEl.value) || 28));
+    lmp = parseD(lmpEl.value);
+    conc = conceptionFromLmp(lmp, cycle);
+    due = dueFromLmp(lmp, cycle);
+  }
+  const winStart = addD(conc, -5), winEnd = addD(conc, 1);
+  concOutEl.textContent = "Estimated conception: " + fmtD(conc);
+  winOutEl.textContent = "Most likely fertile window: " + fmtD(winStart) + " – " + fmtD(winEnd);
+  rConcEl.textContent = fmtD(conc);
+  rWinEl.textContent = fmtD(winStart) + " – " + fmtD(winEnd);
+  rLmpEl.textContent = fmtD(lmp);
+  rDueEl.textContent = fmtD(due);
+}
+const modeEl = document.getElementById("mode"), dueEl = document.getElementById("due"),
+      lmpEl = document.getElementById("lmp"), cycleEl = document.getElementById("cycle");
+const dueWrap = document.getElementById("dueWrap"), lmpWrap = document.getElementById("lmpWrap"), cycWrap = document.getElementById("cycWrap");
+const concOutEl = document.getElementById("concOut"), winOutEl = document.getElementById("winOut");
+const rConcEl = document.getElementById("rConc"), rWinEl = document.getElementById("rWin"),
+      rLmpEl = document.getElementById("rLmp"), rDueEl = document.getElementById("rDue");
+(function(){ const t = new Date(); t.setDate(t.getDate() + 200); dueEl.valueAsDate = t; const l = new Date(); l.setDate(l.getDate() - 100); lmpEl.valueAsDate = l; })();
+[modeEl, dueEl, lmpEl, cycleEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glycemic Load Calculator — GL From GI and Carbs</title>
+<meta name="description" content="Calculate the glycemic load (GL) of a serving from its glycemic index (GI) and available carbohydrate grams, with common food GI presets and low/medium/high bands.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Glycemic Load Calculator",
+  "url": "https://ikesita.github.io/health-calculators/glycemic.html",
+  "applicationCategory": "HealthApplication",
+  "operatingSystem": "Any",
+  "inLanguage": "en",
+  "description": "Calculate glycemic load as GL = GI × available carbohydrate (g) ÷ 100, classify the serving as low (≤10), medium (11–19) or high (≥20), with preset GI values for common foods from published international tables.",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "isAccessibleForFree": true
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What is the difference between GI and GL?", "acceptedAnswer": { "@type": "Answer", "text": "The glycemic index ranks how fast a food's carbohydrate raises blood glucose compared with glucose itself. The glycemic load also accounts for how much carbohydrate a serving actually contains: GL = GI × carbs (g) ÷ 100. Watermelon is the classic example — high GI, but low GL per serving because it is mostly water." } },
+    { "@type": "Question", "name": "What is a low, medium or high glycemic load?", "acceptedAnswer": { "@type": "Answer", "text": "Per serving: 10 or less is low, 11–19 is medium, and 20 or more is high. For a whole day, totals under about 80 are considered low and over about 120 high." } },
+    { "@type": "Question", "name": "How accurate are GI values?", "acceptedAnswer": { "@type": "Answer", "text": "GI is a measured average with wide variation: ripeness, cooking time, processing and what else is eaten with the food all change the real glucose response, and individuals differ too. Treat published GI values as typical figures, not exact personal predictions." } }
+  ]
+}
+</script>
+<style>
+  :root{ --bg:#f6f7f9; --card:#fff; --ink:#1c2333; --sub:#5b6478; --line:#dde1ea; --acc:#0e7490; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 56px}
+  header h1{font-size:25px;margin:8px 0 4px}
+  header p{color:var(--sub);margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(16,24,40,.05)}
+  .card h2{font-size:16px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  .f label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+  .f input,.f select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:16px}
+  .big{font-size:34px;font-weight:900;text-align:center;margin:6px 0 0}
+  .cat{text-align:center;font-weight:800;font-size:17px;color:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:15px}
+  td{padding:6px 0;color:var(--sub)} td.v{text-align:right;color:var(--ink);font-weight:800}
+  tr.hl td{color:var(--acc);font-weight:800}
+  .note{font-size:13px;color:var(--sub)}
+  .qa p{margin:0 0 10px} .qa b{color:var(--ink)}
+  footer{color:var(--sub);font-size:12.5px;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Glycemic Load Calculator</h1>
+    <p>GI alone ignores portion size. Glycemic load combines the glycemic index with the carbohydrate in your actual serving.</p>
+  </header>
+
+  <div class="card">
+    <div class="grid">
+      <div class="f"><label>Food (preset GI, or choose Custom)</label><select id="food"></select></div>
+      <div class="f"><label>Glycemic index (GI)</label><input id="gi" type="number" min="1" max="110" step="1" value="73"></div>
+      <div class="f"><label>Available carbohydrate per serving (g)</label><input id="carbs" type="number" min="0" step="0.5" value="45"></div>
+    </div>
+    <div class="big" id="glOut">-</div>
+    <div class="cat" id="glCat">-</div>
+  </div>
+
+  <div class="card">
+    <table id="glTable">
+      <tr><td colspan="2" style="color:var(--ink);font-weight:800">Glycemic load per serving</td></tr>
+      <tr data-band="low"><td>10 or less</td><td class="v">Low</td></tr>
+      <tr data-band="medium"><td>11 – 19</td><td class="v">Medium</td></tr>
+      <tr data-band="high"><td>20 or more</td><td class="v">High</td></tr>
+    </table>
+    <p class="note" style="margin-top:10px">Formula: GL = GI × available carbohydrate (g) ÷ 100. Preset GI values are typical figures from the published international tables of glycemic index (e.g. Atkinson et al., <i>Diabetes Care</i> 2008 and the University of Sydney database); the same food can test quite differently with ripeness, cooking and brand, so treat them as starting points. Daily totals: under ~80 is classed low, ~80–120 medium, over ~120 high. "Available carbohydrate" means total carbohydrate minus fibre where labels separate them.</p>
+  </div>
+
+  <div class="card qa">
+    <h2>Common questions</h2>
+    <p><b>Why does watermelon come out low?</b><br>Its GI is high (~74) because its sugars absorb quickly, but a typical serving has only ~11 g of carbohydrate, so GL ≈ 8 — low. Portion is exactly what GL adds to the picture.</p>
+    <p><b>Does a low GL mean a food is healthy?</b><br>No. GL says nothing about fibre, micronutrients, sodium or processing. Chocolate can have a modest GL. Use GL as one lens on carbohydrate quality and quantity, not a health score.</p>
+    <p style="margin-bottom:0"><b>I have diabetes. Can I rely on this?</b><br>GL can help plan meals, but individual glucose responses vary a lot and medication changes the picture. Please use this as general information only and follow your care team's guidance — it is not medical advice.</p>
+  </div>
+
+  <footer>Your input stays in your browser and is never sent anywhere. This calculator provides general information only and is not medical advice.</footer>
+</div>
+
+<script>
+const FOODS = [
+  ["Custom GI (enter your own)", null],
+  ["Glucose (reference)", 100],
+  ["White bread", 75],
+  ["Cornflakes", 81],
+  ["Instant oatmeal porridge", 79],
+  ["White rice, cooked", 73],
+  ["Brown rice, cooked", 68],
+  ["Spaghetti, cooked", 49],
+  ["Baked potato", 85],
+  ["Sweet potato, boiled", 63],
+  ["Banana", 51],
+  ["Orange", 43],
+  ["Apple", 36],
+  ["Lentils, cooked", 32],
+  ["Chickpeas, cooked", 28],
+  ["Whole milk", 39],
+  ["Watermelon", 74]
+];
+function glCalc(gi, carbs){ return gi * carbs / 100; }
+function glBand(gl){
+  if(gl <= 10) return ["low", "Low glycemic load"];
+  if(gl < 20) return ["medium", "Medium glycemic load"];
+  return ["high", "High glycemic load"];
+}
+const num = v => { const n = parseFloat(v); return isNaN(n) ? 0 : n; };
+const f1 = x => (Math.round(x * 10) / 10).toFixed(1);
+function onFood(){
+  const gi = FOODS[parseInt(foodEl.value)][1];
+  if(gi !== null) giEl.value = gi;
+  calc();
+}
+function calc(){
+  const gi = num(giEl.value), carbs = num(carbsEl.value);
+  if(gi <= 0 || carbs < 0) return;
+  const gl = glCalc(gi, carbs);
+  const band = glBand(gl);
+  glOutEl.textContent = "GL " + f1(gl);
+  glCatEl.textContent = band[1] + " — per serving";
+  document.querySelectorAll("#glTable tr[data-band]").forEach(tr => tr.classList.toggle("hl", tr.dataset.band === band[0]));
+}
+const foodEl = document.getElementById("food"), giEl = document.getElementById("gi"), carbsEl = document.getElementById("carbs");
+const glOutEl = document.getElementById("glOut"), glCatEl = document.getElementById("glCat");
+FOODS.forEach((f, i) => { const o = document.createElement("option"); o.value = i; o.textContent = f[0] + (f[1] !== null ? " — GI " + f[1] : ""); foodEl.appendChild(o); });
+foodEl.value = "5"; // White rice preset to match the default inputs
+foodEl.addEventListener("input", onFood);
+[giEl, carbsEl].forEach(e => e.addEventListener("input", calc));
+calc();
+</script>
+</body>
+</html>
